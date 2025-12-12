@@ -255,6 +255,21 @@
   .page-header{flex-direction:column!important;align-items:flex-start!important;}
 }
 
+
+/* === PRODUCT TABLE MOBILE LEFT-RIGHT SCROLL FIX === */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media(max-width:700px){
+  .products-table{
+    min-width: 700px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -463,7 +478,7 @@
             </div>
           </div>
 
-          <div style="overflow:auto">
+          <div class="table-scroll">
             <table class="products-table">
               <thead>
                 <tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Cost</th><th>Stock</th><th>Barcode</th><th>Actions</th></tr>
