@@ -198,6 +198,46 @@
   body,html { overflow-x:hidden !important; }
 }
 
+
+/* ===== SUPER RESPONSIVE UNIVERSAL MOBILE FIX ===== */
+@media(max-width: 900px){
+  .main { grid-template-columns: 1fr !important; }
+  aside.sidebar{
+    width:100% !important;
+    position:relative !important;
+    height:auto !important;
+    top:0 !important;
+  }
+  .card{
+    width:100% !important;
+    padding:14px !important;
+  }
+  .billing-layout{
+    grid-template-columns:1fr !important;
+  }
+  input[type="text"], input[type="email"], input[type="number"], select, input[type="password"]{
+    width:100% !important;
+    padding:12px !important;
+    font-size:14px !important;
+  }
+  .profile-grid{
+    grid-template-columns:1fr !important;
+  }
+  .chart-wrap{
+    flex-direction:column !important;
+    flex-wrap:wrap !important;
+  }
+  .chart-card{
+    width:100% !important;
+    max-height:260px !important;
+  }
+  canvas{
+    width:100% !important;
+    height:220px !important;
+  }
+  body,html{ overflow-x:hidden !important; }
+}
+
 </style>
 </head>
 <body>
@@ -468,7 +508,7 @@
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 320px;gap:12px">
+          <div style="display:grid;grid-template-columns:1fr 320px;gap:12px" class="profile-grid">
             <div>
               <div class="card" style="display:flex;flex-direction:column;gap:10px">
                 <div>
