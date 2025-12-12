@@ -185,6 +185,19 @@
   }
 }
 
+
+/* ===== UNIVERSAL MOBILE RESPONSIVE FIX ===== */
+@media (max-width: 900px){
+  .main { grid-template-columns: 1fr !important; }
+  aside.sidebar { width:100%; position:relative; height:auto !important; top:0; }
+  .billing-layout { grid-template-columns: 1fr !important; }
+  .chart-wrap { flex-wrap:wrap !important; }
+  .chart-card { width:100% !important; max-height:300px !important; overflow:hidden; }
+  canvas { width:100% !important; max-width:100% !important; height:220px !important; }
+  table { width:100% !important; font-size:12px !important; }
+  body,html { overflow-x:hidden !important; }
+}
+
 </style>
 </head>
 <body>
