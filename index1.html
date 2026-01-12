@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ShopEase — Enhanced (Dark/Light, Profile, Advanced Billing, Reports)</title>
+
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- jsPDF for invoice generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Chart.js for charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ---------- CSS Reset & Base ---------- */
+    :root{
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --primary: #4b6cb7;
+      --accent: #7b61ff;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --radius: 12px;
+      --shadow: 0 6px 20px rgba(11,14,29,0.06);
+      --glass: rgba(255,255,255,0.6);
+    }
+    [data-theme="dark"]{
+      --bg: #0b1220;
+      --card: #0f1724;
+      --text: #e6eef8;
+      --muted: #9aa6bd;
+      --primary: #6ea8fe;
+      --accent: #b59bff;
+      --glass: rgba(255,255,255,0.03);
+      --shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    html,body{height:100%;}
+    body{background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.4;padding-bottom:80px;}
+
+    /* ---------- Layout ---------- */
+    .wrap{max-width:1200px;margin:18px auto;padding:12px;}
+    header.appbar{
+      display:flex;align-items:center;gap:12px;justify-content:space-between;
+      background:linear-gradient(90deg,var(--primary),var(--accent));
+      color:white;padding:12px;border-radius:12px;box-shadow:var(--shadow);
+      position:sticky;top:12px;z-index:40;
+    }
+    .brand{display:flex;gap:12px;align-items:center;}
+    .brand .logo{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:20px}
+    .brand h1{font-size:18px;letter-spacing:0.2px}
+    .app-actions{display:flex;gap:8px;align-items:center;}
+    .icon-btn{background:transparent;border:none;color:inherit;padding:8px;border-radius:9px;cursor:pointer;font-size:16px}
+    .profile-pill{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:999px;background:var(--glass);backdrop-filter:blur(6px);}
+
+    /* ---------- Main grid ---------- */
+    .main{
+      display:grid;grid-template-columns:260px 1fr;gap:16px;margin-top:18px;
+    }
+
+    /* Sidebar */
+    aside.sidebar{
+      background:var(--card);padding:12px;border-radius:12px;box-shadow:var(--shadow);height:calc(100vh - 200px);position:sticky;top:100px;overflow:auto;
+    }
+    .navlist{display:flex;flex-direction:column;gap:6px;}
+    .navitem{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;text-decoration:none;color:var(--text);cursor:pointer;font-weight:600;}
+    .navitem.active{background:linear-gradient(90deg,rgba(75,108,183,0.12),rgba(123,97,255,0.08));color:var(--primary)}
+    .small-muted{font-size:12px;color:var(--muted);}
+
+    /* Content Card */
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;}
+    .page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+    .flex{display:flex;gap:12px;align-items:center;}
+    .pill{background:var(--glass);padding:6px 10px;border-radius:999px;font-weight:600;}
+
+    /* Dashboard stats */
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px;}
+    .stat{padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent));color:white;}
+    .stat .num{font-size:18px;font-weight:800;margin-top:6px}
+
+    /* Billing layout */
+    .billing-layout{display:grid;grid-template-columns:1fr 360px;gap:12px;}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-height:520px;overflow:auto;padding:6px;}
+    .product-card{background:var(--card);border-radius:10px;padding:10px;cursor:pointer;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:6px;}
+    .product-card .sku{font-size:12px;color:var(--muted)}
+    .product-card .name{font-weight:700}
+    .product-card .price{font-weight:700;color:var(--primary)}
+
+    /* Cart */
+    .cart{display:flex;flex-direction:column;gap:10px;height:520px;overflow:auto;}
+    .cart-items{flex:1;overflow:auto;padding-right:6px;}
+    .cart-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.04);gap:8px;}
+    .qty-controls{display:flex;gap:6px;align-items:center;}
+    .qty-btn{width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+    .price{font-weight:800}
+
+    /* Table styles for products management */
+    table.products-table{width:100%;border-collapse:collapse;font-size:14px}
+    table.products-table th,table.products-table td{padding:8px;text-align:left;border-bottom:1px solid rgba(0,0,0,0.06)}
+    .action-btn{padding:6px 8px;border-radius:8px;border:none;cursor:pointer}
+
+    /* Modal */
+    .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.5);z-index:90;padding:18px}
+    .modal.show{display:flex}
+    .modal-card{width:100%;max-width:720px;background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow);overflow:auto;max-height:90vh}
+
+    /* Forms */
+    .row{display:flex;gap:8px}
+    .col{flex:1}
+    input[type="text"], input[type="email"], input[type="number"], select, input[type="password"]{
+      width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:transparent;color:var(--text)
+    }
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+
+    /* Reports page specific */
+    .reports-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: auto;
+      max-height: none;
+      overflow: visible;
+    }
+    
+    .chart-wrap {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .chart-card {
+      flex: 1;
+      min-width: 300px;
+      min-height: 280px;
+      max-height: 320px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chart-card h4 {
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .chart-card canvas {
+      width: 100% !important;
+      height: 220px !important;
+      flex: 1;
+    }
+    
+    /* Toast */
+    .toast{position:fixed;right:16px;bottom:90px;background:var(--card);padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);z-index:9999}
+    .input-inline{display:flex;gap:8px;align-items:center}
+
+    /* small form tweak */
+    .small-input{width:90px;padding:8px}
+    .file-preview{width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px dashed rgba(0,0,0,0.08)}
+    
+    /* small helpers */
+    .muted{color:var(--muted);font-size:13px}
+    .btn {background:var(--primary);color:white;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text)}
+    .danger{background:var(--danger);color:white}
+    .success{background:var(--success);color:white}
+    .small{font-size:13px;padding:6px 8px;border-radius:8px}
+    .center{display:flex;align-items:center;justify-content:center}
+    img.avatar{width:36px;height:36px;border-radius:999px;object-fit:cover;border:2px solid rgba(255,255,255,0.2)}
+    
+    /* Table scroll fix */
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    @media(max-width:700px){
+      .products-table{
+        min-width: 700px !important;
+      }
+    }
+
+    /* ===== UNIVERSAL MOBILE RESPONSIVE FIX ===== */
+    @media (max-width: 900px){
+      .main { grid-template-columns: 1fr !important; }
+      aside.sidebar { width:100%; position:relative; height:auto !important; top:0; margin-bottom: 16px; }
+      .billing-layout { grid-template-columns: 1fr !important; }
+      .card { width:100% !important; padding:12px !important; overflow: visible; }
+      
+      .chart-wrap { 
+        flex-direction: column !important; 
+        flex-wrap: wrap !important;
+        gap: 12px;
+      }
+      
+      .chart-card { 
+        width:100% !important; 
+        min-height: 260px !important; 
+        max-height: 280px !important; 
+      }
+      
+      .chart-card canvas { 
+        width:100% !important; 
+        max-width:100% !important; 
+        height:200px !important; 
+      }
+      
+      .products-grid { 
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; 
+        max-height: 400px;
+      }
+      
+      .cart {
+        height: auto;
+        max-height: 500px;
+      }
+      
+      .page-header { 
+        flex-direction: column !important; 
+        align-items: flex-start !important; 
+        gap: 8px;
+      }
+      
+      .profile-grid {
+        grid-template-columns: 1fr !important;
+      }
+      
+      table { 
+        width:100% !important; 
+        font-size:12px !important; 
+      }
+      
+      input[type="text"], input[type="email"], input[type="number"], select, input[type="password"] {
+        width:100% !important;
+        padding:10px !important;
+        font-size:14px !important;
+      }
+      
+      body,html { overflow-x:hidden !important; }
+      
+      header.appbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px;
+      }
+      
+      .app-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      
+      .stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      
+      .billing-layout {
+        gap: 16px;
+      }
+      
+      .modal-card {
+        max-height: 80vh;
+        overflow: auto;
+      }
+      
+      .reports-container {
+        min-height: auto;
+        overflow: visible;
+      }
+    }
+    
+    /* Small phones */
+    @media (max-width: 480px) {
+      .stats {
+        grid-template-columns: 1fr !important;
+      }
+      
+      .chart-card {
+        min-height: 240px !important;
+        max-height: 260px !important;
+      }
+      
+      .chart-card canvas {
+        height: 180px !important;
+      }
+      
+      .brand h1 {
+        font-size: 16px;
+      }
+      
+      .logo {
+        width: 36px !important;
+        height: 36px !important;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="wrap" id="app">
+    <!-- Header -->
+    <header class="appbar">
+      <div class="brand">
+        <div class="logo">🛒</div>
+        <div>
+          <h1>ShopEase</h1>
+          <div class="small-muted">Shop management — upgraded</div>
+        </div>
+      </div>
+
+      <div class="app-actions">
+        <div class="profile-pill" title="Theme & profile">
+          <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+          <div id="greeting" style="display:flex;gap:8px;align-items:center">
+            <img id="top-avatar" class="avatar" src="" alt="avatar" onerror="this.style.display='none'">
+            <span class="small-muted" id="top-username">Welcome</span>
+          </div>
+        </div>
+        <button class="icon-btn" id="mobile-menu-btn" title="Open menu"><i class="fas fa-bars"></i></button>
+      </div>
+    </header>
+
+    <div class="main">
+      <!-- Sidebar -->
+      <aside class="sidebar card" id="sidebar">
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+          <img id="sidebar-avatar" class="file-preview" src="" alt="avatar" style="display:none">
+          <div>
+            <div id="sidebar-name" style="font-weight:800;">Shop Owner</div>
+            <div class="small-muted" id="sidebar-shop">ShopEase</div>
+          </div>
+        </div>
+
+        <nav class="navlist">
+          <div class="navitem active" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</div>
+          <div class="navitem" data-page="billing"><i class="fas fa-receipt"></i> Billing</div>
+          <div class="navitem" data-page="products"><i class="fas fa-box"></i> Products</div>
+          <div class="navitem" data-page="customers"><i class="fas fa-users"></i> Customers</div>
+          <div class="navitem" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</div>
+          <div class="navitem" data-page="inventory"><i class="fas fa-clipboard-list"></i> Inventory</div>
+          <div class="navitem" data-page="profile"><i class="fas fa-user-cog"></i> Profile</div>
+          <div style="margin-top:8px"><button class="btn ghost" id="export-data">Export (local)</button></div>
+        </nav>
+        <div style="margin-top:12px" class="small-muted">Tip: data is stored locally (localStorage). Use Export to backup.</div>
+      </aside>
+
+      <!-- Content -->
+      <main>
+        <!-- Dashboard -->
+        <section class="page card" id="dashboard">
+          <div class="page-header">
+            <div><h2>Dashboard</h2><div class="small-muted">Quick overview</div></div>
+            <div class="flex">
+              <div class="small-muted">Theme: <strong id="theme-label">Auto</strong></div>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="small-muted">Today's Sales</div>
+              <div class="num" id="stat-sales">₹0</div>
+            </div>
+            <div class="stat">
+              <div class="small-muted">Total Products</div>
+              <div class="num" id="stat-products">0</div>
+            </div>
+            <div class="stat">
+              <div class="small-muted">Low Stock Items</div>
+              <div class="num" id="stat-lowstock">0</div>
+            </div>
+            <div class="stat">
+              <div class="small-muted">New Customers</div>
+              <div class="num" id="stat-customers">0</div>
+            </div>
+            <div class="stat">
+              <div class="small-muted">Profit (Today)</div>
+              <div class="num" id="stat-profit">₹0</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-bottom:8px">Recent Activity</h3>
+            <ul id="activity-list" style="list-style:none;display:flex;flex-direction:column;gap:8px"></ul>
+          </div>
+        </section>
+
+        <!-- Billing -->
+        <section class="page card" id="billing" style="display:none">
+          <div class="page-header">
+            <div><h2>Billing</h2><div class="small-muted">Create invoices fast</div></div>
+            <div class="flex">
+              <div class="input-inline">
+                <input type="text" id="barcode-input" placeholder="Scan/Enter barcode" style="padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+                <button class="btn" id="barcode-add">Add</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer area -->
+          <div class="card" style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <label>Customer Name</label>
+              <input type="text" id="billing-customer-name" placeholder="Customer name (optional)">
+            </div>
+            <div style="width:220px">
+              <label>Contact Number</label>
+              <input type="text" id="billing-customer-phone" placeholder="Phone">
+            </div>
+            <div style="width:260px">
+              <label>Invoice</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div id="bill-id" class="pill" style="font-weight:800">Invoice #—</div>
+                <button class="btn ghost" id="new-invoice-id" title="Generate new invoice number">New</button>
+              </div>
+              <div class="small-muted" style="margin-top:6px">Invoice format: <code>INV-YYYYMMDD-XXX</code></div>
+            </div>
+          </div>
+
+          <div class="billing-layout">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div class="small-muted">Products</div>
+                <div class="input-inline">
+                  <input type="text" id="search-products" placeholder="Search..." style="padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+                  <select id="filter-cat" style="padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+                    <option value="">All</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="products-grid card" id="products-grid"></div>
+            </div>
+
+            <div class="card cart">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div><h3>Current Bill</h3><div class="small-muted" id="bill-subtext">Invoice details</div></div>
+                <div><button class="btn ghost" id="clear-cart">Clear</button></div>
+              </div>
+
+              <div class="cart-items" id="cart-items">
+                <div class="small-muted center" style="height:160px">Cart is empty — add some products</div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div class="input-inline" style="justify-content:space-between">
+                  <div class="small-muted">Subtotal:</div>
+                  <div class="price" id="subtotal">₹0.00</div>
+                </div>
+                <div class="input-inline" style="justify-content:space-between">
+                  <div class="small-muted">Tax (5%):</div>
+                  <div class="price" id="tax">₹0.00</div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div style="flex:1">
+                    <label>Overall Discount (₹)</label>
+                    <input type="number" id="overall-discount" value="0" min="0" step="0.01">
+                  </div>
+                  <div style="width:120px">
+                    <label>Payment Type</label>
+                    <select id="payment-type">
+                      <option>Cash</option>
+                      <option>Card</option>
+                      <option>UPI</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Cash paid & balance -->
+                <div class="input-inline" style="justify-content:space-between">
+                  <div style="flex:1">
+                    <label>Cash Paid (₹)</label>
+                    <input type="number" id="cash-paid" value="0" min="0" step="0.01">
+                  </div>
+                  <div style="width:150px">
+                    <label>Balance</label>
+                    <div id="balance" class="price">₹0.00</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed rgba(0,0,0,0.06);padding-top:8px">
+                  <div class="small-muted">Total:</div>
+                  <div class="price" id="total">₹0.00</div>
+                </div>
+
+                <div style="display:flex;gap:8px">
+                  <button class="btn" id="checkout-btn">Checkout</button>
+                  <button class="btn ghost" id="generate-pdf">Generate PDF</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Products Management -->
+        <section class="page card" id="products" style="display:none">
+          <div class="page-header">
+            <div><h2>Products</h2><div class="small-muted">Manage inventory</div></div>
+            <div class="flex">
+              <button class="btn" id="open-add-product"><i class="fas fa-plus"></i> Add Product</button>
+              <button class="btn ghost" id="sync-products">Save Locally</button>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <table class="products-table">
+              <thead>
+                <tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Cost</th><th>Stock</th><th>Barcode</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="products-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Customers -->
+        <section class="page card" id="customers" style="display:none">
+          <div class="page-header"><div><h2>Customers</h2><div class="small-muted">Saved customer records</div></div></div>
+
+          <div class="card" id="customers-list" style="display:flex;flex-direction:column;gap:8px"></div>
+        </section>
+
+        <!-- Reports -->
+        <section class="page card reports-container" id="reports" style="display:none">
+          <div class="page-header">
+            <div><h2>Reports</h2><div class="small-muted">Sales & category insights</div></div>
+            <div class="flex">
+              <button class="btn" id="download-reports-pdf"><i class="fas fa-file-pdf"></i> Download Reports PDF</button>
+            </div>
+          </div>
+
+          <div class="small-muted">Below are generated from local orders & products.</div>
+
+          <div class="chart-wrap">
+            <div class="chart-card">
+              <h4>Sales — Last 6 Months</h4>
+              <canvas id="chart-sales"></canvas>
+            </div>
+
+            <div class="chart-card">
+              <h4>Category Share (by Sales)</h4>
+              <canvas id="chart-category"></canvas>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" class="small-muted">Tip: Place orders via Billing to see reports update automatically.</div>
+        </section>
+
+        <!-- Inventory -->
+        <section class="page card" id="inventory" style="display:none">
+          <div class="page-header"><div><h2>Inventory</h2><div class="small-muted">Stock valuation & alerts</div></div></div>
+          <div class="card">
+            <h3>Low stock alerts</h3>
+            <ul id="lowstock-list" style="list-style:none;display:flex;flex-direction:column;gap:8px"></ul>
+          </div>
+        </section>
+
+        <!-- Profile -->
+        <section class="page card" id="profile" style="display:none">
+          <div class="page-header">
+            <div><h2>Profile</h2><div class="small-muted">Your account & shop settings</div></div>
+            <div class="flex">
+              <button class="btn ghost" id="clear-profile">Reset</button>
+              <button class="btn" id="save-profile">Save</button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 320px;gap:12px" class="profile-grid">
+            <div>
+              <div class="card" style="display:flex;flex-direction:column;gap:10px">
+                <div>
+                  <label>Username</label>
+                  <input type="text" id="profile-username" placeholder="Your name">
+                </div>
+                <div>
+                  <label>Email</label>
+                  <input type="email" id="profile-email" placeholder="you@example.com">
+                </div>
+                <div>
+                  <label>Phone</label>
+                  <input type="text" id="profile-phone" placeholder="+91 9XXXXXXXX">
+                </div>
+                <div>
+                  <label>Shop name</label>
+                  <input type="text" id="profile-shopname" placeholder="My Stall">
+                </div>
+                <div>
+                  <label>GST / Tax ID</label>
+                  <input type="text" id="profile-gst" placeholder="GSTIN">
+                </div>
+
+                <div style="margin-top:6px">
+                  <h4>Change Password</h4>
+                  <label>Current Password</label>
+                  <input type="password" id="profile-pass-current" placeholder="current password">
+                  <label>New Password</label>
+                  <input type="password" id="profile-pass-new" placeholder="new password">
+                  <div class="small-muted" style="margin-top:6px">Passwords are stored locally (demo only).</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card" style="display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center">
+                <img id="avatar-preview" class="file-preview" src="" alt="preview" style="display:none">
+                <div id="avatar-placeholder" class="center" style="width:72px;height:72px;border-radius:10px;background:var(--glass);font-weight:700">No<br>Photo</div>
+
+                <div style="width:100%;display:flex;flex-direction:column;gap:8px">
+                  <label>Upload profile picture</label>
+                  <input type="file" id="avatar-input" accept="image/*">
+                  <button class="btn ghost" id="remove-avatar">Remove photo</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Product -->
+  <div class="modal" id="product-modal">
+    <div class="modal-card">
+      <h3 id="product-modal-title">Add Product</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+        <div>
+          <label>Name</label>
+          <input id="p-name" type="text">
+        </div>
+        <div>
+          <label>Category</label>
+          <input id="p-category" type="text" placeholder="e.g. Electronics">
+        </div>
+        <div>
+          <label>Price (₹)</label>
+          <input id="p-price" type="number" min="0" step="0.01">
+        </div>
+        <div>
+          <label>Cost (₹)</label>
+          <input id="p-cost" type="number" min="0" step="0.01">
+        </div>
+        <div>
+          <label>Stock</label>
+          <input id="p-stock" type="number" min="0" step="1">
+        </div>
+        <div>
+          <label>Barcode (optional)</label>
+          <input id="p-barcode" type="text" placeholder="e.g. 123456789012">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn ghost" id="product-cancel">Cancel</button>
+        <button class="btn" id="product-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <script>
+    (function(){
+      // ---------- Utilities ----------
+      const $ = sel => document.querySelector(sel);
+      const $$ = sel => Array.from(document.querySelectorAll(sel));
+      const toastEl = $('#toast');
+      function toast(msg, t=2500){ toastEl.textContent = msg; toastEl.style.display='block'; setTimeout(()=>toastEl.style.display='none', t); }
+
+      // ---------- Storage keys ----------
+      const KEY_PRODUCTS = 'shopease_products_v2';
+      const KEY_CART = 'shopease_cart_v2';
+      const KEY_PROFILE = 'shopease_profile_v2';
+      const KEY_THEME = 'shopease_theme_v2';
+      const KEY_INVOICE = 'shopease_invoice_counter_v1';
+      const KEY_ORDERS = 'shopease_orders_v1';
+      const KEY_CUSTOMERS = 'shopease_customers_v1';
+      const TAX_RATE = 0.05;
+
+      // ---------- Sample initial products (only used if localStorage empty) ----------
+      const sampleProducts = [
+        { id:1, name:"Wireless Mouse", category:"Electronics", price:899, cost:600, stock:25, barcode:"1111111111111" },
+        { id:2, name:"Notebook", category:"Stationery", price:50, cost:30, stock:100, barcode:"2222222222222" },
+        { id:3, name:"Pen", category:"Stationery", price:20, cost:12, stock:200, barcode:"3333333333333" },
+        { id:4, name:"Keyboard", category:"Electronics", price:1299, cost:900, stock:15, barcode:"4444444444444" },
+        { id:5, name:"Rice (1kg)", category:"Groceries", price:60, cost:45, stock:50, barcode:"5555555555555" },
+        { id:6, name:"T-Shirt", category:"Clothing", price:499, cost:350, stock:30, barcode:"6666666666666" },
+        { id:7, name:"USB Cable", category:"Electronics", price:199, cost:120, stock:40, barcode:"7777777777777" },
+        { id:8, name:"Eraser", category:"Stationery", price:10, cost:5, stock:150, barcode:"8888888888888" }
+      ];
+
+      // ---------- App state ----------
+      let products = load(KEY_PRODUCTS) || sampleProducts.slice();
+      let cart = load(KEY_CART) || [];
+      let profile = load(KEY_PROFILE) || { username:'', email:'', phone:'', shopname:'ShopEase', gst:'', avatar:'' };
+      let editingProductId = null;
+
+      let invoiceStore = load(KEY_INVOICE) || { lastDate: null, counter: 0 };
+      save(KEY_INVOICE, invoiceStore);
+
+      let orders = load(KEY_ORDERS) || [];
+      let customers = load(KEY_CUSTOMERS) || [];
+
+      // Chart instances
+      let salesChart = null;
+      let categoryChart = null;
+
+      // ---------- Theme logic (both auto + manual) ----------
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      let themePref = localStorage.getItem(KEY_THEME) || 'auto'; // 'auto'|'dark'|'light'
+      function applyTheme(){
+        const doc = document.documentElement;
+        let mode = themePref;
+        if(mode === 'auto') mode = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+        doc.setAttribute('data-theme', mode === 'dark' ? 'dark' : 'light');
+        $('#theme-label').textContent = themePref === 'auto' ? 'Auto' : (themePref === 'dark' ? 'Dark' : 'Light');
+        $('#theme-toggle').innerHTML = themePref === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      }
+      applyTheme();
+
+      $('#theme-toggle').addEventListener('click', ()=> {
+        if(themePref === 'auto') themePref = prefersDark ? 'light' : 'dark';
+        else if(themePref === 'dark') themePref = 'light';
+        else if(themePref === 'light') themePref = 'auto';
+        localStorage.setItem(KEY_THEME, themePref);
+        applyTheme();
+        toast('Theme: ' + ($('#theme-label').textContent));
+      });
+
+      // ---------- Navigation ----------
+      $$('.navitem').forEach(n=>{
+        n.addEventListener('click', ()=> {
+          $$('.navitem').forEach(x=>x.classList.remove('active'));
+          n.classList.add('active');
+          showPage(n.dataset.page);
+        });
+      });
+
+      function showPage(pageId){
+        $$('.page').forEach(p=>p.style.display='none');
+        const el = $('#' + pageId);
+        if(el) el.style.display = 'block';
+        // update stats when showing dashboard/inventory/products
+        if(pageId === 'dashboard') renderStats();
+        if(pageId === 'inventory') renderLowStock();
+        if(pageId === 'products') renderProductsTable();
+        if(pageId === 'profile') loadProfileToForm();
+        if(pageId === 'customers') renderCustomers();
+        if(pageId === 'reports') renderReports(); // charts
+      }
+
+      // initialize start page
+      showPage('dashboard');
+
+      // Mobile menu (simple)
+      $('#mobile-menu-btn').addEventListener('click', ()=> {
+        window.scrollTo({top:0,behavior:'smooth'});
+        toast('Use the left menu on desktop or scroll on mobile 😉',1200);
+      });
+
+      // ---------- Products UI render ----------
+      const productsGrid = $('#products-grid');
+      function renderProductsGrid(filter=''){
+        productsGrid.innerHTML = '';
+        const catSet = new Set(['']);
+        products.forEach(p=>catSet.add(p.category));
+        // populate filter select
+        const filterSel = $('#filter-cat');
+        filterSel.innerHTML = '<option value="">All</option>';
+        [...catSet].filter(Boolean).forEach(c=>{
+          const opt = document.createElement('option'); opt.value=c; opt.textContent=c; filterSel.appendChild(opt);
+        });
+
+        const q = (filter || '').trim().toLowerCase();
+        const list = products.filter(p=>{
+          if(q && !(p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || (p.barcode||'').includes(q))) return false;
+          const cat = $('#filter-cat').value;
+          if(cat && p.category !== cat) return false;
+          return true;
+        });
+
+        if(list.length === 0){ productsGrid.innerHTML = '<div class="small-muted center" style="height:120px">No products found</div>'; return; }
+
+        list.forEach(p=>{
+          const el = document.createElement('div'); el.className='product-card';
+          el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+                            <div><div class="name">${escapeHtml(p.name)}</div><div class="sku small-muted">${escapeHtml(p.category)}</div></div>
+                            <div style="text-align:right"><div class="price">₹${num(p.price)}</div><div class="sku small-muted">Stock: ${p.stock}</div></div>
+                          </div>`;
+          el.addEventListener('click', ()=> addToCart(p.id));
+          productsGrid.appendChild(el);
+        });
+      }
+      renderProductsGrid();
+
+      $('#search-products').addEventListener('input', ()=> renderProductsGrid($('#search-products').value));
+      $('#filter-cat').addEventListener('change', ()=> renderProductsGrid($('#search-products').value));
+
+      // ---------- Products table ----------
+      function renderProductsTable(){
+        const tbody = $('#products-table-body'); tbody.innerHTML = '';
+        products.forEach(p=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${p.id}</td>
+                          <td>${escapeHtml(p.name)}</td>
+                          <td>${escapeHtml(p.category)}</td>
+                          <td>₹${num(p.price)}</td>
+                          <td>₹${num(p.cost)}</td>
+                          <td>${p.stock}</td>
+                          <td>${p.barcode || '-'}</td>
+                          <td>
+                            <button class="action-btn" data-id="${p.id}" data-action="edit"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn" data-id="${p.id}" data-action="del"><i class="fas fa-trash"></i></button>
+                          </td>`;
+          tbody.appendChild(tr);
+        });
+        // attach listeners
+        tbody.querySelectorAll('.action-btn').forEach(bt=>{
+          bt.addEventListener('click', (e)=>{
+            const id = Number(bt.dataset.id);
+            const action = bt.dataset.action;
+            if(action === 'edit') openEditProduct(id);
+            if(action === 'del') {
+              if(confirm('Delete product?')) { products = products.filter(p=>p.id!==id); save(KEY_PRODUCTS, products); renderProductsTable(); renderProductsGrid($('#search-products').value); toast('Deleted'); }
+            }
+          });
+        });
+      }
+
+      // ---------- Product modal logic ----------
+      $('#open-add-product').addEventListener('click', ()=> {
+        editingProductId = null;
+        $('#product-modal-title').textContent = 'Add Product';
+        $('#p-name').value='';$('#p-category').value='';$('#p-price').value='';$('#p-cost').value='';$('#p-stock').value='';$('#p-barcode').value='';
+        $('#product-modal').classList.add('show');
+      });
+      $('#product-cancel').addEventListener('click', ()=> $('#product-modal').classList.remove('show'));
+      $('#product-save').addEventListener('click', ()=>{
+        const name = $('#p-name').value.trim(); if(!name){toast('Product name required');return;}
+        const category = $('#p-category').value.trim() || 'Uncategorized';
+        const price = parseFloat($('#p-price').value) || 0;
+        const cost = parseFloat($('#p-cost').value) || 0;
+        const stock = parseInt($('#p-stock').value) || 0;
+        const barcode = $('#p-barcode').value.trim();
+
+        if(editingProductId){
+          const idx = products.findIndex(p=>p.id===editingProductId);
+          if(idx!==-1) products[idx] = {...products[idx], name, category, price, cost, stock, barcode};
+          toast('Product updated');
+        } else {
+          const newId = products.length ? Math.max(...products.map(x=>x.id))+1 : 1;
+          products.push({ id:newId, name, category, price, cost, stock, barcode });
+          toast('Product added');
+        }
+        save(KEY_PRODUCTS, products);
+        $('#product-modal').classList.remove('show');
+        renderProductsTable(); renderProductsGrid($('#search-products').value);
+      });
+
+      function openEditProduct(id){
+        const p = products.find(x=>x.id===id); if(!p) return;
+        editingProductId = id;
+        $('#product-modal-title').textContent = 'Edit Product';
+        $('#p-name').value = p.name; $('#p-category').value = p.category; $('#p-price').value = p.price; $('#p-cost').value = p.cost; $('#p-stock').value = p.stock; $('#p-barcode').value = p.barcode || '';
+        $('#product-modal').classList.add('show');
+      }
+
+      // ---------- Cart logic ----------
+      function addToCart(productId, qty=1){
+        const p = products.find(x=>x.id===productId);
+        if(!p){ toast('Product not found'); return; }
+        const item = cart.find(c=>c.id===productId);
+        if(item){ item.quantity += qty; } else {
+          cart.push({ id:p.id, name:p.name, price:p.price, quantity: qty, discount:0 }); // discount in ₹
+        }
+        save(KEY_CART, cart);
+        renderCart();
+        toast(p.name + ' added');
+      }
+
+      function renderCart(){
+        const container = $('#cart-items'); container.innerHTML = '';
+        if(cart.length === 0){ container.innerHTML = '<div class="small-muted center" style="height:160px">Cart is empty</div>'; updateSummary(); return; }
+        cart.forEach(item=>{
+          const p = products.find(x=>x.id===item.id);
+          const row = document.createElement('div'); row.className='cart-item';
+          row.innerHTML = `<div style="flex:1">
+                            <div style="font-weight:800">${escapeHtml(item.name)}</div>
+                            <div class="small-muted">₹${num(item.price)} • ${(p?('Stock: '+p.stock):'')}</div>
+                            <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+                              <div class="qty-controls">
+                                <button class="qty-btn" data-id="${item.id}" data-op="-">-</button>
+                                <div style="min-width:28px;text-align:center">${item.quantity}</div>
+                                <button class="qty-btn" data-id="${item.id}" data-op="+">+</button>
+                              </div>
+                              <div style="display:flex;flex-direction:column">
+                                <label style="font-size:12px;color:var(--muted)">Item discount (₹)</label>
+                                <input class="small-input" type="number" min="0" value="${item.discount || 0}" data-id="${item.id}" data-type="item-discount">
+                              </div>
+                            </div>
+                          </div>
+                          <div style="text-align:right">
+                            <div style="font-weight:800">₹${num((item.price*item.quantity) - (item.discount||0))}</div>
+                            <div style="margin-top:8px"><button class="btn ghost" data-id="${item.id}" data-action="remove">Remove</button></div>
+                          </div>`;
+          container.appendChild(row);
+        });
+
+        // attach cart item listeners
+        container.querySelectorAll('.qty-btn').forEach(b=>{
+          b.addEventListener('click', ()=> {
+            const id = Number(b.dataset.id); const op = b.dataset.op;
+            const it = cart.find(x=>x.id===id); if(!it) return;
+            if(op === '+') it.quantity++;
+            else it.quantity = Math.max(0, it.quantity-1);
+            if(it.quantity === 0) cart = cart.filter(x=>x.id!==id);
+            save(KEY_CART, cart); renderCart(); updateSummary();
+          });
+        });
+        container.querySelectorAll('[data-type="item-discount"]').forEach(inp=>{
+          inp.addEventListener('input', ()=> {
+            const id = Number(inp.dataset.id);
+            const v = parseFloat(inp.value) || 0;
+            const it = cart.find(x=>x.id===id);
+            if(it){ it.discount = Math.max(0, v); save(KEY_CART, cart); updateSummary(); }
+          });
+        });
+        container.querySelectorAll('[data-action="remove"]').forEach(bt=>{
+          bt.addEventListener('click', ()=> {
+            const id = Number(bt.dataset.id);
+            cart = cart.filter(x=>x.id!==id); save(KEY_CART, cart); renderCart(); updateSummary(); toast('Removed');
+          });
+        });
+
+        updateSummary();
+      }
+      renderCart();
+
+      // overall discount change
+      $('#overall-discount').addEventListener('input', updateSummary);
+      $('#cash-paid').addEventListener('input', updateSummary);
+
+      // clear cart
+      $('#clear-cart').addEventListener('click', ()=> {
+        if(confirm('Clear cart?')) { cart = []; save(KEY_CART, cart); renderCart(); toast('Cleared'); }
+      })
+
+      // ---------- Summary calculation ----------
+      function updateSummary(){
+        const subtotal = cart.reduce((s,it)=> s + (it.price * it.quantity) - (Number(it.discount)||0), 0);
+        const tax = subtotal * TAX_RATE;
+        const overallDisc = parseFloat($('#overall-discount').value) || 0;
+        const total = Math.max(0, subtotal + tax - overallDisc);
+        $('#subtotal').textContent = '₹' + num(subtotal);
+        $('#tax').textContent = '₹' + num(tax);
+        $('#total').textContent = '₹' + num(total);
+
+        const cashPaid = parseFloat($('#cash-paid').value) || 0;
+        const balance = Math.max(0, total - cashPaid);
+        $('#balance').textContent = '₹' + num(balance);
+      }
+
+      // ---------- Invoice ID logic ----------
+      function generateInvoiceId(){
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth()+1).padStart(2,'0');
+        const d = String(now.getDate()).padStart(2,'0');
+        const dateStr = `${y}${m}${d}`; // YYYYMMDD
+
+        let inv = load(KEY_INVOICE) || { lastDate: null, counter: 0 };
+        if(inv.lastDate === dateStr){
+          inv.counter = (inv.counter || 0) + 1;
+        } else {
+          inv.lastDate = dateStr;
+          inv.counter = 1;
+        }
+        save(KEY_INVOICE, inv);
+        const padded = String(inv.counter).padStart(3,'0');
+        return `INV-${dateStr}-${padded}`;
+      }
+
+      // preview invoice id without consuming counter
+      function previewInvoiceId(){
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth()+1).padStart(2,'0');
+        const d = String(now.getDate()).padStart(2,'0');
+        const dateStr = `${y}${m}${d}`; // YYYYMMDD
+        const inv = load(KEY_INVOICE) || { lastDate: null, counter: 0 };
+        let nextCounter = 1;
+        if(inv.lastDate === dateStr){
+          nextCounter = (inv.counter || 0) + 1;
+        } else {
+          nextCounter = 1;
+        }
+        const padded = String(nextCounter).padStart(3,'0');
+        return `INV-${dateStr}-${padded}`;
+      }
+
+      // initialize preview invoice id
+      let lastGeneratedInvoice = previewInvoiceId();
+      $('#bill-id').textContent = lastGeneratedInvoice;
+
+      $('#new-invoice-id').addEventListener('click', ()=>{
+        const id = generateInvoiceId();
+        lastGeneratedInvoice = id;
+        $('#bill-id').textContent = id;
+        toast('Invoice ID generated: ' + id);
+      });
+
+      // ---------- Checkout / PDF ----------
+      $('#checkout-btn').addEventListener('click', ()=> {
+        if(cart.length === 0){ toast('Cart empty!'); return; }
+
+        // gather customer info
+        const customerName = ($('#billing-customer-name').value || '').trim();
+        const customerPhone = ($('#billing-customer-phone').value || '').trim();
+
+        // compute totals to store
+        const subtotal = cart.reduce((s,it)=> s + (it.price * it.quantity) - (Number(it.discount)||0), 0);
+        const tax = subtotal * TAX_RATE;
+        const overallDisc = parseFloat($('#overall-discount').value) || 0;
+        const total = Math.max(0, subtotal + tax - overallDisc);
+        const cashPaid = parseFloat($('#cash-paid').value) || 0;
+        const balance = Math.max(0, total - cashPaid);
+
+        // FIXED PROFIT CALCULATION: Calculate actual profit considering item discounts
+        let profit = 0;
+        cart.forEach(it => {
+          const product = products.find(p => p.id === it.id);
+          if (product) {
+            // Calculate profit per item: (selling price - cost) * quantity - item discount
+            const itemProfit = ((product.price - product.cost) * it.quantity) - (it.discount || 0);
+            profit += Math.max(0, itemProfit); // Ensure profit is not negative
+          }
+        });
+        
+        // Reduce overall discount from profit (since discount reduces revenue)
+        profit = Math.max(0, profit - overallDisc);
+
+        // reduce stock for items
+        cart.forEach(it=>{
+          const p = products.find(x=>x.id===it.id); if(p){ p.stock = Math.max(0, p.stock - it.quantity); }
+        });
+        save(KEY_PRODUCTS, products);
+
+        // record order & profit
+        const invId = lastGeneratedInvoice || generateInvoiceId();
+        lastGeneratedInvoice = invId;
+        $('#bill-id').textContent = invId;
+
+        const order = {
+          id: invId,
+          customerName: customerName || 'Walk-in',
+          customerPhone: customerPhone || '',
+          items: JSON.parse(JSON.stringify(cart)),
+          subtotal, tax, discount: overallDisc, total, cashPaid, balance, profit, date: new Date().toISOString()
+        };
+        orders.push(order);
+        save(KEY_ORDERS, orders);
+
+        // AUTO-SAVE CUSTOMER IF NAME EXISTS
+        let custRecord = null;
+        if(customerName){
+          const exists = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase() && (c.phone || '') === (customerPhone || c.phone || ''));
+          if(!exists){
+            custRecord = {
+                id: Date.now(),
+                name: customerName,
+                phone: customerPhone,
+                credit: balance > 0 ? balance : 0,
+                history: [ { orderId: invId, date: order.date, total: order.total, balance: balance } ]
+            };
+            customers.push(custRecord);
+          } else {
+            // update existing record's credit & history
+            exists.credit = (exists.credit || 0) + (balance > 0 ? balance : 0);
+            exists.history = exists.history || [];
+            exists.history.push({ orderId: invId, date: order.date, total: order.total, balance: balance });
+            custRecord = exists;
+          }
+          save(KEY_CUSTOMERS, customers);
+        }
+
+        // record activity
+        const custText = customerName ? `${customerName}${customerPhone ? ' ('+customerPhone+')' : ''}` : 'Walk-in';
+        addActivity(`Order placed: ₹${num(total)} • ${custText} • Inv: ${invId} • Profit: ₹${num(profit)}`);
+
+        // clear cart input fields but keep invoice id preview
+        cart = [];
+        save(KEY_CART, cart);
+        renderCart(); renderProductsGrid($('#search-products').value); renderProductsTable();
+        renderCustomers();
+        renderStats();
+        renderReports(); // update charts
+
+        toast(`Order placed — Profit: ₹${num(profit)}`);
+      });
+
+      $('#generate-pdf').addEventListener('click', ()=> {
+        if(cart.length === 0){ toast('Cart empty!'); return; }
+        generateInvoicePDF();
+      });
+
+      // generate invoice using jsPDF (formatted table)
+      async function generateInvoicePDF(){
+        const customerName = ($('#billing-customer-name').value || '').trim();
+        const customerPhone = ($('#billing-customer-phone').value || '').trim();
+        const invId = generateInvoiceId(); // consume id for this PDF
+        lastGeneratedInvoice = invId;
+        $('#bill-id').textContent = invId;
+
+        const subtotal = cart.reduce((s,it)=> s + (it.price * it.quantity) - (Number(it.discount)||0), 0);
+        const tax = subtotal * TAX_RATE;
+        const overallDisc = parseFloat($('#overall-discount').value) || 0;
+        const total = Math.max(0, subtotal + tax - overallDisc);
+        const cashPaid = parseFloat($('#cash-paid').value) || 0;
+        const balance = Math.max(0, total - cashPaid);
+
+        // FIXED PROFIT CALCULATION for PDF order
+        let profit = 0;
+        cart.forEach(it => {
+          const product = products.find(p => p.id === it.id);
+          if (product) {
+            const itemProfit = ((product.price - product.cost) * it.quantity) - (it.discount || 0);
+            profit += Math.max(0, itemProfit);
+          }
+        });
+        profit = Math.max(0, profit - overallDisc);
+
+        // also save order (PDF generation can be used standalone)
+        const order = {
+          id: invId,
+          customerName: customerName || 'Walk-in',
+          customerPhone: customerPhone || '',
+          items: JSON.parse(JSON.stringify(cart)),
+          subtotal, tax, discount: overallDisc, total, cashPaid, balance, profit, date: new Date().toISOString()
+        };
+        orders.push(order);
+        save(KEY_ORDERS, orders);
+
+        // update customer credit if needed
+        if(customerName){
+          const exists = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase() && (c.phone || '') === (customerPhone || ''));
+          if(!exists){
+            customers.push({
+              id: Date.now(),
+              name: customerName,
+              phone: customerPhone,
+              credit: balance > 0 ? balance : 0,
+              history: [ { orderId: invId, date: order.date, total: order.total, balance: balance } ]
+            });
+          } else {
+            exists.credit = (exists.credit || 0) + (balance > 0 ? balance : 0);
+            exists.history = exists.history || [];
+            exists.history.push({ orderId: invId, date: order.date, total: order.total, balance: balance });
+          }
+          save(KEY_CUSTOMERS, customers);
+          renderCustomers();
+        }
+
+        // PDF generation
+        const jsPDF = window.jspdf.jsPDF;
+        const doc = new jsPDF({ unit:'pt', format:'a4' });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const left = 40;
+        const rightLimit = pageWidth - 40;
+        let y = 40;
+
+        // Header
+        doc.setFontSize(18); doc.setFont("helvetica","bold");
+        doc.text('ShopEase Invoice', left, y);
+        doc.setFontSize(11); doc.setFont("helvetica","normal");
+        doc.text(`${profile.shopname || 'ShopEase'}`, left, y + 20);
+        doc.text(`GST: ${profile.gst || '-'}`, left, y + 36);
+
+        // Invoice meta on right
+        doc.setFontSize(12);
+        doc.text(`Invoice: ${invId}`, rightLimit - 200, y + 4);
+        doc.setFontSize(10);
+        const now = new Date();
+        doc.text(`Date: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, rightLimit - 200, y + 20);
+
+        // Customer block
+        y += 60;
+        doc.setFontSize(12); doc.setFont("helvetica","bold");
+        doc.text('Bill To:', left, y);
+        doc.setFont("helvetica","normal");
+        doc.setFontSize(11);
+        const custDisplay = customerName ? customerName : 'Walk-in Customer';
+        doc.text(`Name: ${custDisplay}`, left, y + 16);
+        if(customerPhone) doc.text(`Contact: ${customerPhone}`, left, y + 32);
+        // shop contact on right
+        doc.text(`Shop: ${profile.shopname || 'ShopEase'}`, rightLimit - 240, y + 16);
+        if(profile.phone) doc.text(`Phone: ${profile.phone}`, rightLimit - 240, y + 32);
+        y += 56;
+
+        // Table header
+        const tableLeft = left;
+        const tableRight = rightLimit;
+        const colWidths = [260, 60, 80, 80, 80]; // Item, Qty, Price, Discount, Total
+        const colX = [tableLeft, tableLeft + colWidths[0], tableLeft + colWidths[0] + colWidths[1], tableLeft + colWidths[0] + colWidths[1] + colWidths[2], tableLeft + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3]];
+        const tableTop = y;
+        const rowHeight = 18;
+
+        // draw header row background
+        doc.setFillColor(240,240,240);
+        doc.rect(tableLeft - 2, tableTop - 10, tableRight - tableLeft + 4, rowHeight + 6, 'F');
+
+        doc.setFont("helvetica","bold"); doc.setFontSize(10);
+        doc.text('Item', colX[0] + 4, tableTop + 4);
+        doc.text('Qty', colX[1] + 4, tableTop + 4);
+        doc.text('Rate', colX[2] + 4, tableTop + 4);
+        doc.text('Discount', colX[3] + 4, tableTop + 4);
+        doc.text('Amount', colX[4] + 4, tableTop + 4);
+
+        y = tableTop + rowHeight;
+
+        doc.setFont("helvetica","normal");
+        let runningSubtotal = 0;
+        cart.forEach((it, idx)=>{
+          const lineTotal = (it.price * it.quantity) - (Number(it.discount)||0);
+          // check page break
+          if(y > 760){
+            doc.addPage();
+            y = 40;
+          }
+          // item name (wrap if long)
+          const itemName = it.name;
+          doc.text(truncateText(itemName, 40), colX[0] + 4, y);
+          doc.text(String(it.quantity), colX[1] + 4, y);
+          doc.text('₹' + num(it.price), colX[2] + 4, y);
+          doc.text('₹' + num(it.discount || 0), colX[3] + 4, y);
+          doc.text('₹' + num(lineTotal), colX[4] + 4, y);
+          // draw row separators
+          doc.setDrawColor(220,220,220);
+          doc.line(tableLeft - 2, y + 6, tableRight + 2, y + 6);
+          y += rowHeight;
+          runningSubtotal += lineTotal;
+        });
+
+        // totals
+        const taxAmt = runningSubtotal * TAX_RATE;
+        const overallDiscAmt = overallDisc;
+        const totalAmt = Math.max(0, runningSubtotal + taxAmt - overallDiscAmt);
+
+        y += 8;
+        doc.setFont("helvetica","bold");
+        doc.text(`Subtotal: ₹${num(runningSubtotal)}`, tableRight - 160, y + 10);
+        doc.text(`Tax (5%): ₹${num(taxAmt)}`, tableRight - 160, y + 28);
+        doc.text(`Discount: ₹${num(overallDiscAmt)}`, tableRight - 160, y + 46);
+        doc.text(`Total: ₹${num(totalAmt)}`, tableRight - 160, y + 64);
+        
+        // Add profit to PDF
+        doc.text(`Profit: ₹${num(profit)}`, tableRight - 160, y + 82);
+
+        // Payment details
+        y += 110;
+        doc.setFont("helvetica","bold");
+        doc.text("Payment Details", left, y);
+        doc.setFont("helvetica","normal");
+        y += 18;
+        doc.text(`Cash Paid: ₹${num(cashPaid)}`, left, y);
+        y += 16;
+        doc.text(`Balance: ₹${num(balance)}`, left, y);
+
+        // Footer note
+        y += 40;
+        doc.setFont("helvetica","normal");
+        doc.setFontSize(10);
+        doc.text('Thank you for your purchase!', left, y);
+        doc.text('This is a computer generated invoice.', left, y + 14);
+
+        // save PDF (this triggers download)
+        doc.save(`${invId}.pdf`);
+        toast('PDF generated and downloaded');
+
+        // update UI / reports (we saved order already)
+        renderStats();
+        renderReports();
+      }
+
+      function truncateText(str, maxLen){
+        if(String(str).length <= maxLen) return str;
+        return String(str).slice(0, maxLen-3) + '...';
+      }
+
+      // ---------- Barcode input handling ----------
+      $('#barcode-add').addEventListener('click', ()=>{
+        const code = $('#barcode-input').value.trim();
+        if(!code){ toast('Enter barcode'); return; }
+        // find product by barcode
+        const p = products.find(x=>x.barcode === code || String(x.id) === code);
+        if(p){ addToCart(p.id); $('#barcode-input').value=''; }
+        else { toast('Barcode not found'); }
+      });
+
+      // allow pressing Enter to add
+      $('#barcode-input').addEventListener('keydown', (e)=> { if(e.key === 'Enter') $('#barcode-add').click(); });
+
+      // ---------- Product search by barcode or id ----------
+      $('#export-data').addEventListener('click', ()=> {
+        const data = { products, profile, customers, orders, date: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download = 'shopease_export.json'; a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // ---------- Low stock rendering ----------
+      function renderLowStock(){
+        const list = $('#lowstock-list'); list.innerHTML = '';
+        const low = products.filter(p=>p.stock <= 10).sort((a,b)=>a.stock-b.stock);
+        if(low.length === 0){ list.innerHTML = '<div class="small-muted">No low stock items</div>'; return; }
+        low.forEach(p=>{
+          const li = document.createElement('div'); li.className='card'; li.style.display='flex'; li.style.justifyContent='space-between'; li.style.alignItems='center';
+          li.innerHTML = `<div><div style="font-weight:800">${escapeHtml(p.name)}</div><div class="small-muted">Stock: ${p.stock} • Category: ${escapeHtml(p.category)}</div></div><div><button class="btn ghost" data-id="${p.id}" data-act="restock">Restock</button></div>`;
+          list.appendChild(li);
+        });
+        list.querySelectorAll('[data-act="restock"]').forEach(bt=>{
+          bt.addEventListener('click', ()=> {
+            const id = Number(bt.dataset.id);
+            const qty = Number(prompt('Add qty', '10')) || 0;
+            const p = products.find(x=>x.id===id); if(p){ p.stock += qty; save(KEY_PRODUCTS, products); renderLowStock(); renderProductsGrid(); renderProductsTable(); toast('Restocked'); renderReports(); }
+          });
+        });
+      }
+
+      // ---------- Activities ----------
+      function addActivity(text){
+        const list = $('#activity-list');
+        const li = document.createElement('li'); li.className='small-muted';
+        li.textContent = `${new Date().toLocaleString()}: ${text}`;
+        list.prepend(li);
+      }
+
+      // ---------- Customers rendering ----------
+      function renderCustomers(){
+        const box = $('#customers-list');
+        box.innerHTML = '';
+
+        if(customers.length === 0){
+            box.innerHTML = '<div class="small-muted">No customers added yet</div>';
+            return;
+        }
+
+        customers.forEach(c=>{
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.style.padding = '10px';
+            el.style.display = 'flex';
+            el.style.flexDirection = 'column';
+            el.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div>
+                    <div style="font-weight:800">${escapeHtml(c.name)}</div>
+                    <div class="small-muted">Phone: ${escapeHtml(c.phone || '-')}</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="small-muted">Credit Due</div>
+                    <div style="font-weight:800">₹${num(c.credit || 0)}</div>
+                  </div>
+                </div>
+                <div style="margin-top:8px" class="small-muted">Orders: ${ (c.history && c.history.length) || 0 }</div>
+            `;
+            box.appendChild(el);
+        });
+      }
+
+      // ---------- Profile logic ----------
+      function saveProfileFromForm(){
+        profile.username = $('#profile-username').value.trim();
+        profile.email = $('#profile-email').value.trim();
+        profile.phone = $('#profile-phone').value.trim();
+        profile.shopname = $('#profile-shopname').value.trim();
+        profile.gst = $('#profile-gst').value.trim();
+
+        // change password (demo local)
+        const current = $('#profile-pass-current').value;
+        const newp = $('#profile-pass-new').value;
+        // naive: store password as plain in profile.pass (demo only)
+        if(newp){
+          profile.pass = newp;
+          $('#profile-pass-current').value=''; $('#profile-pass-new').value='';
+          toast('Password updated (local demo)');
+        }
+
+        save(KEY_PROFILE, profile);
+        applyProfileToUI();
+        toast('Profile saved locally');
+      }
+
+      function loadProfileToForm(){
+        $('#profile-username').value = profile.username || '';
+        $('#profile-email').value = profile.email || '';
+        $('#profile-phone').value = profile.phone || '';
+        $('#profile-shopname').value = profile.shopname || '';
+        $('#profile-gst').value = profile.gst || '';
+        if(profile.avatar){ $('#avatar-preview').src = profile.avatar; $('#avatar-preview').style.display='block'; $('#avatar-placeholder').style.display='none'; $('#sidebar-avatar').src = profile.avatar; $('#sidebar-avatar').style.display = 'block'; $('#top-avatar').src = profile.avatar; $('#top-avatar').style.display='block'; }
+        else { $('#avatar-preview').style.display='none'; $('#avatar-placeholder').style.display='block'; $('#sidebar-avatar').style.display='none'; $('#top-avatar').style.display='none'; }
+      }
+
+      $('#save-profile').addEventListener('click', saveProfileFromForm);
+      $('#clear-profile').addEventListener('click', ()=> {
+        if(confirm('Reset profile data?')) { profile = { username:'', email:'', phone:'', shopname:'ShopEase', gst:'', avatar:'' }; save(KEY_PROFILE, profile); loadProfileToForm(); applyProfileToUI(); toast('Profile reset'); }
+      });
+
+      // avatar upload
+      $('#avatar-input').addEventListener('change', (e)=>{
+        const f = e.target.files[0]; if(!f) return;
+        const reader = new FileReader();
+        reader.onload = function(ev){ profile.avatar = ev.target.result; save(KEY_PROFILE, profile); loadProfileToForm(); applyProfileToUI(); toast('Avatar uploaded'); };
+        reader.readAsDataURL(f);
+      });
+      $('#remove-avatar').addEventListener('click', ()=> { profile.avatar=''; save(KEY_PROFILE, profile); loadProfileToForm(); applyProfileToUI(); toast('Avatar removed'); });
+
+      function applyProfileToUI(){
+        $('#sidebar-name').textContent = profile.username || 'Shop Owner';
+        $('#sidebar-shop').textContent = profile.shopname || 'ShopEase';
+        $('#top-username').textContent = profile.username || 'Welcome';
+        if(profile.avatar){ $('#top-avatar').src = profile.avatar; $('#top-avatar').style.display='block'; $('#sidebar-avatar').src = profile.avatar; $('#sidebar-avatar').style.display='block'; } else { $('#top-avatar').style.display='none'; $('#sidebar-avatar').style.display='none'; }
+      }
+      applyProfileToUI();
+      loadProfileToForm();
+
+      // ---------- Persist helpers ----------
+      function save(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+      function load(key){ try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e){ return null; } }
+
+      // ---------- Helpers ----------
+      function num(v){ return Number(v).toFixed(2); }
+      function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+
+      // ---------- Init Derived UI values ----------
+      function renderStats(){
+        const todayKey = new Date().toISOString().slice(0,10);
+        const todayOrders = (orders || []).filter(o => o.date && o.date.startsWith(todayKey));
+        const totalSales = todayOrders.reduce((a,b)=> a + (b.total || 0), 0);
+        const profit = todayOrders.reduce((a,b)=> a + (b.profit || 0), 0);
+
+        const totalProducts = products.length;
+        const lowstock = products.filter(p=>p.stock<=10).length;
+
+        $('#stat-sales').textContent = '₹' + num(totalSales);
+        $('#stat-products').textContent = totalProducts;
+        $('#stat-lowstock').textContent = lowstock;
+        $('#stat-customers').textContent = customers.length;
+        $('#stat-profit').textContent = '₹' + num(profit);
+      }
+      renderStats();
+
+      function saveAll(){
+        save(KEY_PRODUCTS, products);
+        save(KEY_CART, cart);
+        save(KEY_PROFILE, profile);
+        save(KEY_INVOICE, invoiceStore);
+        save(KEY_ORDERS, orders);
+        save(KEY_CUSTOMERS, customers);
+      }
+
+      // save periodically & before unload
+      window.addEventListener('beforeunload', saveAll);
+
+      // ---------- Barcode quick add: if user pastes or uses scanner -->
+      // allow direct numeric entry into search-products and detecting barcode by pressing Enter
+      $('#search-products').addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){
+          const q = $('#search-products').value.trim();
+          if(!q) return;
+          const byBarcode = products.find(p=>p.barcode === q) || products.find(p=>String(p.id) === q);
+          if(byBarcode){ addToCart(byBarcode.id); $('#search-products').value=''; }
+        }
+      });
+
+      // ---------- Simple product import (sync-products) ----------
+      $('#sync-products').addEventListener('click', ()=> { save(KEY_PRODUCTS, products); toast('Products saved locally'); });
+
+      // ---------- Load persisted state at startup (already done) ----------
+      renderProductsTable();
+      renderProductsGrid();
+      renderLowStock();
+      renderCart();
+      renderCustomers();
+
+      // ---------- Utility: open edit if double-click product -->
+      productsGrid.addEventListener('dblclick', (e)=>{
+        const nameEl = e.target.closest('.product-card');
+        if(!nameEl) return;
+        // try find product by name text
+        const title = nameEl.querySelector('.name')?.textContent || '';
+        const p = products.find(x=>x.name === title);
+        if(p) openEditProduct(p.id);
+      });
+
+      // ---------- Extra: quick keyboard shortcuts (kinda fun) ----------
+      window.addEventListener('keydown', (e)=>{
+        if(e.key === 'p' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); showPage('products'); toast('Products'); }
+        if(e.key === 'b' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); showPage('billing'); toast('Billing'); }
+      });
+
+      // ----------------- REPORTS: Charts and PDF export -----------------
+      function renderReports(){
+        // Prepare dataset from 'orders' and 'products'
+        // Sales - last 6 months aggregation
+        const now = new Date();
+        const months = [];
+        for(let i=5;i>=0;i--){
+          const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+          const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+          months.push({ key, label: d.toLocaleString(undefined, { month: 'short', year: 'numeric' }) , total:0 });
+        }
+        orders.forEach(o=>{
+          if(!o.date) return;
+          const d = new Date(o.date);
+          const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+          const m = months.find(x=>x.key===k);
+          if(m) m.total += (o.total || 0);
+        });
+
+        const salesLabels = months.map(m=>m.label);
+        const salesData = months.map(m=> Number(m.total.toFixed(2)) );
+
+        // Category share: sum totals by category using order items
+        const catMap = {};
+        orders.forEach(o=>{
+          (o.items || []).forEach(it=>{
+            const prod = products.find(p=>p.id === it.id);
+            const cat = (prod && prod.category) ? prod.category : 'Uncategorized';
+            const amount = ((it.price || 0) * (it.quantity || 0)) - (Number(it.discount)||0);
+            catMap[cat] = (catMap[cat] || 0) + amount;
+          });
+        });
+        // ensure categories exist even if zero
+        products.forEach(p=>{ if(!catMap[p.category]) catMap[p.category] = catMap[p.category] || 0; });
+
+        const catLabels = Object.keys(catMap);
+        const catData = catLabels.map(k=> Number((catMap[k] || 0).toFixed(2)) );
+
+        // Destroy previous charts to avoid duplicate canvases
+        if(salesChart){ salesChart.destroy(); salesChart = null; }
+        if(categoryChart){ categoryChart.destroy(); categoryChart = null; }
+
+        // Sales Chart (bar)
+        const ctxSales = document.getElementById('chart-sales');
+        if (!ctxSales) return;
+        const ctxSales2d = ctxSales.getContext('2d');
+        salesChart = new Chart(ctxSales2d, {
+          type: 'line',
+          data: {
+            labels: salesLabels,
+            datasets: [{
+              label: 'Sales (₹)',
+              data: salesData,
+              backgroundColor: 'rgba(75, 108, 183, 0.2)',
+              borderColor: 'rgba(75, 108, 183, 1)',
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+              x: { 
+                grid: { display: false }
+              },
+              y: { 
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return '₹' + value;
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        // Category Chart (pie)
+        const ctxCat = document.getElementById('chart-category');
+        if (!ctxCat) return;
+        const ctxCat2d = ctxCat.getContext('2d');
+        
+        // Generate colors for categories
+        const backgroundColors = [
+          'rgba(75, 108, 183, 0.8)',
+          'rgba(123, 97, 255, 0.8)',
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+          'rgba(153, 102, 255, 0.8)',
+          'rgba(255, 159, 64, 0.8)'
+        ];
+        
+        categoryChart = new Chart(ctxCat2d, {
+          type: 'pie',
+          data: {
+            labels: catLabels,
+            datasets: [{
+              label: 'Category Share',
+              data: catData,
+              backgroundColor: backgroundColors.slice(0, catLabels.length),
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { 
+                position: 'bottom',
+                labels: {
+                  padding: 15,
+                  usePointStyle: true,
+                  font: {
+                    size: 11
+                  }
+                }
+              },
+              tooltip: { 
+                callbacks: {
+                  label: (ctx) => {
+                    const v = ctx.parsed || 0;
+                    const total = ctx.dataset.data.reduce((a,b)=>a+b,0) || 1;
+                    const pct = ((v/total)*100).toFixed(1);
+                    return `${ctx.label}: ₹${num(v)} (${pct}%)`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Hook reports PDF download - capture both canvases & include in PDF
+      $('#download-reports-pdf').addEventListener('click', async ()=>{
+        // make sure charts are rendered
+        renderReports();
+
+        try {
+          const jsPDF = window.jspdf.jsPDF;
+          const doc = new jsPDF({ unit:'pt', format:'a4' });
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const left = 30;
+          let y = 40;
+          doc.setFontSize(16); doc.setFont("helvetica","bold");
+          doc.text(`${profile.shopname || 'ShopEase'} — Reports`, left, y);
+          doc.setFontSize(10); doc.setFont("helvetica","normal");
+          y += 18;
+          doc.text(`Generated: ${new Date().toLocaleString()}`, left, y);
+          y += 18;
+
+          // Sales chart image
+          const salesCanvas = document.getElementById('chart-sales');
+          const salesImg = salesCanvas.toDataURL('image/png', 1.0);
+          const imgW = pageWidth - (left*2);
+          const imgH = (salesCanvas.height / salesCanvas.width) * imgW;
+          y += 10;
+          doc.addImage(salesImg, 'PNG', left, y, imgW, imgH);
+          y += imgH + 16;
+
+          // Category chart (if it overflows page, add new page)
+          const catCanvas = document.getElementById('chart-category');
+          const catImg = catCanvas.toDataURL('image/png', 1.0);
+          const catH = (catCanvas.height / catCanvas.width) * imgW;
+          if(y + catH > doc.internal.pageSize.getHeight() - 40){
+            doc.addPage();
+            y = 40;
+          }
+          doc.addImage(catImg, 'PNG', left, y, imgW, catH);
+          y += catH + 16;
+
+          // Small summary table: top categories
+          const catMap = {};
+          orders.forEach(o=>{
+            (o.items || []).forEach(it=>{
+              const prod = products.find(p=>p.id === it.id);
+              const cat = (prod && prod.category) ? prod.category : 'Uncategorized';
+              const amount = ((it.price || 0) * (it.quantity || 0)) - (Number(it.discount)||0);
+              catMap[cat] = (catMap[cat] || 0) + amount;
+            });
+          });
+          const entries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+          if(y > doc.internal.pageSize.getHeight() - 120){
+            doc.addPage();
+            y = 40;
+          }
+          doc.setFontSize(12); doc.setFont("helvetica","bold");
+          doc.text('Top Categories (by sales)', left, y);
+          doc.setFontSize(10); doc.setFont("helvetica","normal");
+          y += 14;
+          entries.forEach(([k,v])=>{
+            doc.text(`${k}: ₹${num(v)}`, left, y);
+            y += 12;
+          });
+
+          const filename = `reports_${(new Date()).toISOString().slice(0,19).replace(/[:T]/g,'-')}.pdf`;
+          doc.save(filename);
+          toast('Reports PDF generated');
+        } catch(err){
+          console.error(err);
+          toast('Failed to generate PDF');
+        }
+      });
+
+      // render reports initially
+      renderReports();
+
+      // update reports when orders/products change
+      const origSave = save;
+      save = function(key, value){
+        origSave(key, value);
+        if(key === KEY_ORDERS || key === KEY_PRODUCTS) {
+          // re-render reports and stats
+          setTimeout(() => {
+            renderReports();
+            renderStats();
+          }, 100);
+        }
+      };
+
+      // ---------- Customers rendering & other UI initial calls ----------
+      renderCustomers();
+
+    })();
+  </script>
+</body>
+</html>
