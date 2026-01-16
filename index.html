@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ShopEase — Enhanced (Dark/Light, Profile, Advanced Billing, Reports)</title>
+  <title>ShopEase — Your Smart Billing Partner</title>
 
   <!-- FontAwesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -117,15 +117,56 @@
     }
     label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
 
-    /* responsive */
-    @media (max-width: 900px){
-      .main{grid-template-columns:1fr;gap:12px}
-      aside.sidebar{position:relative;height:auto}
-      .billing-layout{grid-template-columns:1fr}
-      .card{overflow:visible}
-      header.appbar{flex-wrap:wrap;gap:8px}
+    /* Reports page specific */
+    .reports-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: auto;
+      max-height: none;
+      overflow: visible;
     }
+    
+    .chart-wrap {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .chart-card {
+      flex: 1;
+      min-width: 300px;
+      min-height: 280px;
+      max-height: 320px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chart-card h4 {
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .chart-card canvas {
+      width: 100% !important;
+      height: 220px !important;
+      flex: 1;
+    }
+    
+    /* Toast */
+    .toast{position:fixed;right:16px;bottom:90px;background:var(--card);padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);z-index:9999}
+    .input-inline{display:flex;gap:8px;align-items:center}
 
+    /* small form tweak */
+    .small-input{width:90px;padding:8px}
+    .file-preview{width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px dashed rgba(0,0,0,0.08)}
+    
     /* small helpers */
     .muted{color:var(--muted);font-size:13px}
     .btn {background:var(--primary);color:white;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
@@ -135,142 +176,135 @@
     .small{font-size:13px;padding:6px 8px;border-radius:8px}
     .center{display:flex;align-items:center;justify-content:center}
     img.avatar{width:36px;height:36px;border-radius:999px;object-fit:cover;border:2px solid rgba(255,255,255,0.2)}
+    
+    /* Table scroll fix */
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    @media(max-width:700px){
+      .products-table{
+        min-width: 700px !important;
+      }
+    }
 
+    /* ===== UNIVERSAL MOBILE RESPONSIVE FIX ===== */
+    @media (max-width: 900px){
+      .main { grid-template-columns: 1fr !important; }
+      aside.sidebar { width:100%; position:relative; height:auto !important; top:0; margin-bottom: 16px; }
+      .billing-layout { grid-template-columns: 1fr !important; }
+      .card { width:100% !important; padding:12px !important; overflow: visible; }
+      
+      .chart-wrap { 
+        flex-direction: column !important; 
+        flex-wrap: wrap !important;
+        gap: 12px;
+      }
+      
+      .chart-card { 
+        width:100% !important; 
+        min-height: 260px !important; 
+        max-height: 280px !important; 
+      }
+      
+      .chart-card canvas { 
+        width:100% !important; 
+        max-width:100% !important; 
+        height:200px !important; 
+      }
+      
+      .products-grid { 
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; 
+        max-height: 400px;
+      }
+      
+      .cart {
+        height: auto;
+        max-height: 500px;
+      }
+      
+      .page-header { 
+        flex-direction: column !important; 
+        align-items: flex-start !important; 
+        gap: 8px;
+      }
+      
+      .profile-grid {
+        grid-template-columns: 1fr !important;
+      }
+      
+      table { 
+        width:100% !important; 
+        font-size:12px !important; 
+      }
+      
+      input[type="text"], input[type="email"], input[type="number"], select, input[type="password"] {
+        width:100% !important;
+        padding:10px !important;
+        font-size:14px !important;
+      }
+      
+      body,html { overflow-x:hidden !important; }
+      
+      header.appbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px;
+      }
+      
+      .app-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      
+      .stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      
+      .billing-layout {
+        gap: 16px;
+      }
+      
+      .modal-card {
+        max-height: 80vh;
+        overflow: auto;
+      }
+      
+      .reports-container {
+        min-height: auto;
+        overflow: visible;
+      }
+    }
+    
+    /* Small phones */
+    @media (max-width: 480px) {
+      .stats {
+        grid-template-columns: 1fr !important;
+      }
+      
+      .chart-card {
+        min-height: 240px !important;
+        max-height: 260px !important;
+      }
+      
+      .chart-card canvas {
+        height: 180px !important;
+      }
+      
+      .brand h1 {
+        font-size: 16px;
+      }
+      
+      .logo {
+        width: 36px !important;
+        height: 36px !important;
+      }
+    }
 
-
-    /* toast */
-    .toast{position:fixed;right:16px;bottom:90px;background:var(--card);padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);z-index:9999}
-    .input-inline{display:flex;gap:8px;align-items:center}
-
-    /* small form tweak */
-    .small-input{width:90px;padding:8px}
-    .file-preview{width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px dashed rgba(0,0,0,0.08))}
-    .chart-wrap{display:flex;gap:12px;flex-wrap:nowrap;justify-content:space-between;}
-    .chart-card{flex:1;min-width:260px;max-width:720px;padding:12px;border-radius:10px;background:var(--card);box-shadow:var(--shadow)}
-  
-/* ----------------- MOBILE FULL RESPONSIVE FIXES ----------------- */
-@media (max-width: 600px){
-
-  aside.sidebar{
-    width: 100%;
-    height: auto !important;
-    position: relative;
-    top: 0;
-    margin-bottom: 10px;
-  }
-  .card{
-    width: 100% !important;
-    overflow-x: hidden;
-  }
-  .billing-layout{
-    grid-template-columns: 1fr !important;
-  }
-  .products-grid{
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
-  }
-  .chart-wrap{
-    flex-direction: column !important;
-    flex-wrap: wrap !important;
-  }
-  .chart-card{
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-  table{
-    font-size: 12px !important;
-    width: 100%;
-  }
-  body, html{
-    overflow-x: hidden !important;
-  }
-}
-
-
-/* ===== UNIVERSAL MOBILE RESPONSIVE FIX ===== */
-@media (max-width: 900px){
-  .main { grid-template-columns: 1fr !important; }
-  aside.sidebar { width:100%; position:relative; height:auto !important; top:0; }
-  .billing-layout { grid-template-columns: 1fr !important; }
-  .chart-wrap { flex-wrap:wrap !important; }
-  .chart-card { width:100% !important; max-height:300px !important; overflow:hidden; }
-  canvas { width:100% !important; max-width:100% !important; height:220px !important; }
-  table { width:100% !important; font-size:12px !important; }
-  body,html { overflow-x:hidden !important; }
-}
-
-
-/* ===== SUPER RESPONSIVE UNIVERSAL MOBILE FIX ===== */
-@media(max-width: 900px){
-  .main { grid-template-columns: 1fr !important; }
-  aside.sidebar{
-    width:100% !important;
-    position:relative !important;
-    height:auto !important;
-    top:0 !important;
-  }
-  .card{
-    width:100% !important;
-    padding:14px !important;
-  }
-  .billing-layout{
-    grid-template-columns:1fr !important;
-  }
-  input[type="text"], input[type="email"], input[type="number"], select, input[type="password"]{
-    width:100% !important;
-    padding:12px !important;
-    font-size:14px !important;
-  }
-  .profile-grid{
-    grid-template-columns:1fr !important;
-  }
-  .chart-wrap{
-    flex-direction:column !important;
-    flex-wrap:wrap !important;
-  }
-  .chart-card{
-    width:100% !important;
-    max-height:260px !important;
-  }
-  canvas{
-    width:100% !important;
-    height:220px !important;
-  }
-  body,html{ overflow-x:hidden !important; }
-}
-
-
-/* === FULL APP RESPONSIVE PATCH === */
-@media(max-width:900px){
-  .main{grid-template-columns:1fr !important;}
-  aside.sidebar{width:100%!important;position:relative!important;height:auto!important;top:0!important;}
-  .page.card{width:100%!important;padding:12px!important;}
-  .card{width:100%!important;overflow:visible!important;}
-  input,select{width:100%!important;font-size:15px!important;padding:12px!important;}
-  .billing-layout{grid-template-columns:1fr!important;}
-  .products-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))!important;}
-  table{font-size:12px!important;width:100%!important;}
-  canvas{width:100%!important;height:220px!important;max-height:220px!important;}
-  .chart-card{width:100%!important;max-height:260px!important;}
-  .chart-wrap{flex-wrap:wrap!important;flex-direction:column!important;}
-  .page-header{flex-direction:column!important;align-items:flex-start!important;}
-}
-
-
-/* === PRODUCT TABLE MOBILE LEFT-RIGHT SCROLL FIX === */
-.table-scroll {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-@media(max-width:700px){
-  .products-table{
-    min-width: 700px !important;
-  }
-}
-
-</style>
+  </style>
 </head>
 <body>
 
@@ -281,7 +315,7 @@
         <div class="logo">🛒</div>
         <div>
           <h1>ShopEase</h1>
-          <div class="small-muted">Shop management — upgraded</div>
+          <div class="small-muted">Your Smart Billing Partner</div>
         </div>
       </div>
 
@@ -496,7 +530,7 @@
         </section>
 
         <!-- Reports -->
-        <section class="page card" id="reports" style="display:none">
+        <section class="page card reports-container" id="reports" style="display:none">
           <div class="page-header">
             <div><h2>Reports</h2><div class="small-muted">Sales & category insights</div></div>
             <div class="flex">
@@ -508,13 +542,13 @@
 
           <div class="chart-wrap">
             <div class="chart-card">
-              <h4 style="margin-bottom:8px">Sales — Last 6 Months</h4>
-              <canvas id="chart-sales" height="220"></canvas>
+              <h4>Sales — Last 6 Months</h4>
+              <canvas id="chart-sales"></canvas>
             </div>
 
             <div class="chart-card">
-              <h4 style="margin-bottom:8px">Category Share (by Sales)</h4>
-              <canvas id="chart-category" height="220"></canvas>
+              <h4>Category Share (by Sales)</h4>
+              <canvas id="chart-category"></canvas>
             </div>
           </div>
 
@@ -932,9 +966,6 @@
         const cashPaid = parseFloat($('#cash-paid').value) || 0;
         const balance = Math.max(0, total - cashPaid);
         $('#balance').textContent = '₹' + num(balance);
-
-        // Do not auto-modify customer credit here permanently.
-        // Changes to customer credit should happen on confirmed checkout.
       }
 
       // ---------- Invoice ID logic ----------
@@ -1002,6 +1033,20 @@
         const cashPaid = parseFloat($('#cash-paid').value) || 0;
         const balance = Math.max(0, total - cashPaid);
 
+        // FIXED PROFIT CALCULATION: Calculate actual profit considering item discounts
+        let profit = 0;
+        cart.forEach(it => {
+          const product = products.find(p => p.id === it.id);
+          if (product) {
+            // Calculate profit per item: (selling price - cost) * quantity - item discount
+            const itemProfit = ((product.price - product.cost) * it.quantity) - (it.discount || 0);
+            profit += Math.max(0, itemProfit); // Ensure profit is not negative
+          }
+        });
+        
+        // Reduce overall discount from profit (since discount reduces revenue)
+        profit = Math.max(0, profit - overallDisc);
+
         // reduce stock for items
         cart.forEach(it=>{
           const p = products.find(x=>x.id===it.id); if(p){ p.stock = Math.max(0, p.stock - it.quantity); }
@@ -1012,9 +1057,6 @@
         const invId = lastGeneratedInvoice || generateInvoiceId();
         lastGeneratedInvoice = invId;
         $('#bill-id').textContent = invId;
-
-        const costSum = cart.reduce((a,b)=> a + (products.find(p=>p.id===b.id)?.cost || 0) * b.quantity, 0);
-        const profit = subtotal - costSum;
 
         const order = {
           id: invId,
@@ -1051,7 +1093,7 @@
 
         // record activity
         const custText = customerName ? `${customerName}${customerPhone ? ' ('+customerPhone+')' : ''}` : 'Walk-in';
-        addActivity(`Order placed: ₹${num(total)} • ${custText} • Inv: ${invId}`);
+        addActivity(`Order placed: ₹${num(total)} • ${custText} • Inv: ${invId} • Profit: ₹${num(profit)}`);
 
         // clear cart input fields but keep invoice id preview
         cart = [];
@@ -1061,7 +1103,7 @@
         renderStats();
         renderReports(); // update charts
 
-        toast('Order placed — saved locally');
+        toast(`Order placed — Profit: ₹${num(profit)}`);
       });
 
       $('#generate-pdf').addEventListener('click', ()=> {
@@ -1084,9 +1126,18 @@
         const cashPaid = parseFloat($('#cash-paid').value) || 0;
         const balance = Math.max(0, total - cashPaid);
 
+        // FIXED PROFIT CALCULATION for PDF order
+        let profit = 0;
+        cart.forEach(it => {
+          const product = products.find(p => p.id === it.id);
+          if (product) {
+            const itemProfit = ((product.price - product.cost) * it.quantity) - (it.discount || 0);
+            profit += Math.max(0, itemProfit);
+          }
+        });
+        profit = Math.max(0, profit - overallDisc);
+
         // also save order (PDF generation can be used standalone)
-        const costSum = cart.reduce((a,b)=> a + (products.find(p=>p.id===b.id)?.cost || 0) * b.quantity, 0);
-        const profit = subtotal - costSum;
         const order = {
           id: invId,
           customerName: customerName || 'Walk-in',
@@ -1208,9 +1259,12 @@
         doc.text(`Tax (5%): ₹${num(taxAmt)}`, tableRight - 160, y + 28);
         doc.text(`Discount: ₹${num(overallDiscAmt)}`, tableRight - 160, y + 46);
         doc.text(`Total: ₹${num(totalAmt)}`, tableRight - 160, y + 64);
+        
+        // Add profit to PDF
+        doc.text(`Profit: ₹${num(profit)}`, tableRight - 160, y + 82);
 
         // Payment details
-        y += 100;
+        y += 110;
         doc.setFont("helvetica","bold");
         doc.text("Payment Details", left, y);
         doc.setFont("helvetica","normal");
@@ -1496,15 +1550,21 @@
         if(categoryChart){ categoryChart.destroy(); categoryChart = null; }
 
         // Sales Chart (bar)
-        const ctxSales = document.getElementById('chart-sales').getContext('2d');
-        salesChart = new Chart(ctxSales, {
+        const ctxSales = document.getElementById('chart-sales');
+        if (!ctxSales) return;
+        const ctxSales2d = ctxSales.getContext('2d');
+        salesChart = new Chart(ctxSales2d, {
           type: 'line',
           data: {
             labels: salesLabels,
             datasets: [{
               label: 'Sales (₹)',
               data: salesData,
-              // colors will be auto-picked by Chart.js
+              backgroundColor: 'rgba(75, 108, 183, 0.2)',
+              borderColor: 'rgba(75, 108, 183, 1)',
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true
             }]
           },
           options: {
@@ -1515,36 +1575,73 @@
               tooltip: { mode: 'index', intersect: false }
             },
             scales: {
-              x: { stacked: false },
-              y: { beginAtZero: true }
+              x: { 
+                grid: { display: false }
+              },
+              y: { 
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return '₹' + value;
+                  }
+                }
+              }
             }
           }
         });
 
         // Category Chart (pie)
-        const ctxCat = document.getElementById('chart-category').getContext('2d');
-        categoryChart = new Chart(ctxCat, {
+        const ctxCat = document.getElementById('chart-category');
+        if (!ctxCat) return;
+        const ctxCat2d = ctxCat.getContext('2d');
+        
+        // Generate colors for categories
+        const backgroundColors = [
+          'rgba(75, 108, 183, 0.8)',
+          'rgba(123, 97, 255, 0.8)',
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+          'rgba(153, 102, 255, 0.8)',
+          'rgba(255, 159, 64, 0.8)'
+        ];
+        
+        categoryChart = new Chart(ctxCat2d, {
           type: 'pie',
           data: {
             labels: catLabels,
             datasets: [{
               label: 'Category Share',
-              data: catData
+              data: catData,
+              backgroundColor: backgroundColors.slice(0, catLabels.length),
+              borderWidth: 1
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'bottom' },
-              tooltip: { callbacks: {
-                label: (ctx) => {
-                  const v = ctx.parsed || 0;
-                  const total = ctx.dataset.data.reduce((a,b)=>a+b,0) || 1;
-                  const pct = ((v/total)*100).toFixed(1);
-                  return `${ctx.label}: ₹${num(v)} (${pct}%)`;
+              legend: { 
+                position: 'bottom',
+                labels: {
+                  padding: 15,
+                  usePointStyle: true,
+                  font: {
+                    size: 11
+                  }
                 }
-              } }
+              },
+              tooltip: { 
+                callbacks: {
+                  label: (ctx) => {
+                    const v = ctx.parsed || 0;
+                    const total = ctx.dataset.data.reduce((a,b)=>a+b,0) || 1;
+                    const pct = ((v/total)*100).toFixed(1);
+                    return `${ctx.label}: ₹${num(v)} (${pct}%)`;
+                  }
+                }
+              }
             }
           }
         });
@@ -1626,14 +1723,15 @@
       renderReports();
 
       // update reports when orders/products change
-      // We'll wrap save() to call renderReports where appropriate
       const origSave = save;
       save = function(key, value){
         origSave(key, value);
         if(key === KEY_ORDERS || key === KEY_PRODUCTS) {
           // re-render reports and stats
-          renderReports();
-          renderStats();
+          setTimeout(() => {
+            renderReports();
+            renderStats();
+          }, 100);
         }
       };
 
