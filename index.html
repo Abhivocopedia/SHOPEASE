@@ -231,8 +231,6 @@
     .input-inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
     .small-input{min-width:100px;padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);height:44px;}
     
-    .file-preview{width:80px;height:80px;border-radius:12px;object-fit:cover;border:1px dashed rgba(0,0,0,0.08);}
-    
     /* Table scroll container - DESKTOP ONLY */
     .table-scroll {
       width: 100%;
@@ -434,6 +432,84 @@
       margin-top: 8px;
       font-family: monospace;
     }
+
+    /* ===== PROFILE SECTION FIXES ===== */
+    
+    /* Profile Avatar - Fixed size constraints */
+    #avatar-preview,
+    .file-preview {
+      width: 150px !important;
+      height: 150px !important;
+      object-fit: cover !important;
+      border-radius: 12px;
+      border: 1px dashed rgba(0,0,0,0.08);
+      display: none; /* Will be shown by JS when image exists */
+    }
+    
+    /* Avatar placeholder - same fixed dimensions */
+    #avatar-placeholder {
+      width: 150px !important;
+      height: 150px !important;
+      border-radius: 12px;
+      background: var(--glass);
+      font-weight: 700;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.4;
+    }
+    
+    /* Sidebar and Top Bar Avatars - strictly capped */
+    #sidebar-avatar,
+    #top-avatar,
+    .avatar {
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
+      max-width: 40px !important;
+      max-height: 40px !important;
+      object-fit: cover !important;
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    
+    /* Profile Grid Layout - Desktop */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 300px !important; /* Fixed width for avatar column */
+      gap: 16px;
+      align-items: start;
+    }
+    
+    /* Profile card containing avatar */
+    #profile .card:last-child {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+      position: sticky;
+      top: 20px;
+    }
+    
+    /* File input styling */
+    #avatar-input {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+    }
+    
+    /* Ensure avatar container doesn't overflow */
+    #profile .card:last-child > div {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
     
     /* ===== MOBILE-FIRST MEDIA QUERIES ===== */
     
@@ -534,9 +610,35 @@
         gap: 10px;
       }
       
-      /* Profile grid stacks */
+      /* Mobile profile grid stacks */
       .profile-grid {
         grid-template-columns: 1fr !important;
+        gap: 20px;
+      }
+      
+      /* On mobile, avatar can be slightly smaller */
+      #avatar-preview,
+      .file-preview,
+      #avatar-placeholder {
+        width: 120px !important;
+        height: 120px !important;
+      }
+      
+      /* Remove sticky on mobile */
+      #profile .card:last-child {
+        position: static;
+      }
+      
+      /* Sidebar and top avatars remain small on mobile */
+      #sidebar-avatar,
+      #top-avatar,
+      .avatar {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        max-width: 36px !important;
+        max-height: 36px !important;
       }
       
       /* Stats grid - 2 columns on mobile */
@@ -740,6 +842,13 @@
       .chart-card canvas {
         height: 160px !important;
       }
+      
+      #avatar-preview,
+      .file-preview,
+      #avatar-placeholder {
+        width: 100px !important;
+        height: 100px !important;
+      }
     }
     
     /* Desktop adjustments (above 768px) */
@@ -800,6 +909,19 @@
       aspect-ratio: 16/9;
     }
 
+    /* Additional fix for product action buttons */
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .swipe-action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
   </style>
 </head>
 <body>
@@ -861,7 +983,7 @@
       <!-- Sidebar (unchanged structure, hidden on mobile) -->
       <aside class="sidebar card" id="sidebar">
         <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
-          <img id="sidebar-avatar" class="file-preview" src="" alt="avatar" style="display:none">
+          <img id="sidebar-avatar" class="avatar" src="" alt="avatar" style="display:none">
           <div>
             <div id="sidebar-name" style="font-weight:800;">Shop Owner</div>
             <div class="small-muted" id="sidebar-shop">ShopEase</div>
@@ -881,7 +1003,7 @@
         <div style="margin-top:12px" class="small-muted">Tip: data is stored locally (localStorage). Use Export to backup.</div>
       </aside>
 
-      <!-- Content (all existing content remains exactly the same) -->
+      <!-- Content -->
       <main>
         <!-- Dashboard -->
         <section class="page card" id="dashboard">
@@ -1094,7 +1216,7 @@
           </div>
         </section>
 
-        <!-- Profile -->
+        <!-- Profile - FIXED VERSION -->
         <section class="page card" id="profile" style="display:none">
           <div class="page-header">
             <div><h2>Profile</h2><div class="small-muted">Your account & shop settings</div></div>
@@ -1104,7 +1226,8 @@
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 320px;gap:16px" class="profile-grid">
+          <div class="profile-grid">
+            <!-- Left Column - Form Fields -->
             <div>
               <div class="card" style="display:flex;flex-direction:column;gap:16px">
                 <div>
@@ -1139,15 +1262,25 @@
               </div>
             </div>
 
+            <!-- Right Column - Avatar Section (Fixed Size) -->
             <div>
-              <div class="card" style="display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center">
+              <div class="card" style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+                <!-- Avatar Preview Image -->
                 <img id="avatar-preview" class="file-preview" src="" alt="preview" style="display:none">
-                <div id="avatar-placeholder" class="center" style="width:80px;height:80px;border-radius:12px;background:var(--glass);font-weight:700;text-align:center;">No<br>Photo</div>
+                
+                <!-- Avatar Placeholder (shown when no image) -->
+                <div id="avatar-placeholder" class="center" style="display:flex;">No<br>Photo</div>
 
+                <!-- Upload Controls -->
                 <div style="width:100%;display:flex;flex-direction:column;gap:12px">
                   <label>Upload profile picture</label>
                   <input type="file" id="avatar-input" accept="image/*">
                   <button class="btn ghost" id="remove-avatar">Remove photo</button>
+                </div>
+                
+                <!-- Help text -->
+                <div class="small-muted" style="text-align:center">
+                  Recommended: Square image<br>Max size: 150×150px
                 </div>
               </div>
             </div>
@@ -1199,7 +1332,6 @@
 
   <script>
     (function(){
-      // All JavaScript code remains EXACTLY the same - no changes
       // ---------- Utilities ----------
       const $ = sel => document.querySelector(sel);
       const $$ = sel => Array.from(document.querySelectorAll(sel));
@@ -1266,7 +1398,7 @@
         toast('Theme: ' + ($('#theme-label').textContent));
       });
 
-      // ---------- Navigation (updated to handle both desktop sidebar and mobile bottom nav) ----------
+      // ---------- Navigation ----------
       function setupNavigation() {
         // Desktop sidebar navitems
         $$('.navitem').forEach(n=>{
@@ -1310,17 +1442,20 @@
       function showPage(pageId){
         $$('.page').forEach(p=>p.style.display='none');
         const el = $('#' + pageId);
-        if(el) el.style.display = 'block';
-        // update stats when showing dashboard/inventory/products
-        if(pageId === 'dashboard') renderStats();
-        if(pageId === 'inventory') renderLowStock();
-        if(pageId === 'products') {
-          renderProductsTable();
-          renderMobileProductsList(); // Render mobile cards when products page is shown
+        if(el) {
+          el.style.display = 'block';
+          
+          // Special handling for products page to ensure both views are rendered
+          if(pageId === 'products') {
+            renderProductsTable(); // Desktop table
+            renderMobileProductsList(); // Mobile cards
+          }
+          if(pageId === 'dashboard') renderStats();
+          if(pageId === 'inventory') renderLowStock();
+          if(pageId === 'profile') loadProfileToForm();
+          if(pageId === 'customers') renderCustomers();
+          if(pageId === 'reports') renderReports();
         }
-        if(pageId === 'profile') loadProfileToForm();
-        if(pageId === 'customers') renderCustomers();
-        if(pageId === 'reports') renderReports(); // charts
       }
 
       // Initialize navigation
@@ -1375,7 +1510,9 @@
 
       // ---------- Products table (DESKTOP) ----------
       function renderProductsTable(){
-        const tbody = $('#products-table-body'); tbody.innerHTML = '';
+        const tbody = $('#products-table-body'); 
+        if (!tbody) return;
+        tbody.innerHTML = '';
         products.forEach(p=>{
           const tr = document.createElement('tr');
           tr.innerHTML = `<td>${p.id}</td>
@@ -1398,7 +1535,14 @@
             const action = bt.dataset.action;
             if(action === 'edit') openEditProduct(id);
             if(action === 'del') {
-              if(confirm('Delete product?')) { products = products.filter(p=>p.id!==id); save(KEY_PRODUCTS, products); renderProductsTable(); renderProductsGrid($('#search-products').value); renderMobileProductsList(); toast('Deleted'); }
+              if(confirm('Delete product?')) { 
+                products = products.filter(p=>p.id!==id); 
+                save(KEY_PRODUCTS, products); 
+                renderProductsTable(); 
+                renderProductsGrid($('#search-products').value); 
+                renderMobileProductsList(); 
+                toast('Deleted'); 
+              }
             }
           });
         });
@@ -1424,7 +1568,6 @@
           // Track touch events for swipe
           let touchStartX = 0;
           let touchEndX = 0;
-          let isSwiped = false;
           
           const card = document.createElement('div');
           card.className = 'swipeable-card';
@@ -1507,22 +1650,6 @@
             touchEndX = 0;
           }, { passive: true });
           
-          // Click on card (not swipe) - optional: could open edit or view details
-          card.addEventListener('click', (e) => {
-            // Don't trigger if clicking on action buttons
-            if (e.target.closest('.swipe-action-btn')) return;
-            
-            // If card is swiped, don't trigger click
-            if (card.classList.contains('swiped-left')) {
-              card.classList.remove('swiped-left');
-              return;
-            }
-            
-            // Optional: you could open edit modal or show details
-            // For now, we'll do nothing or could open edit
-            // openEditProduct(p.id);
-          });
-          
           // Action button handlers
           const editBtn = card.querySelector('.edit-btn');
           const deleteBtn = card.querySelector('.delete-btn');
@@ -1598,7 +1725,7 @@
         if(!p){ toast('Product not found'); return; }
         const item = cart.find(c=>c.id===productId);
         if(item){ item.quantity += qty; } else {
-          cart.push({ id:p.id, name:p.name, price:p.price, quantity: qty, discount:0 }); // discount in ₹
+          cart.push({ id:p.id, name:p.name, price:p.price, quantity: qty, discount:0 });
         }
         save(KEY_CART, cart);
         renderCart();
@@ -2124,8 +2251,20 @@
         $('#profile-phone').value = profile.phone || '';
         $('#profile-shopname').value = profile.shopname || '';
         $('#profile-gst').value = profile.gst || '';
-        if(profile.avatar){ $('#avatar-preview').src = profile.avatar; $('#avatar-preview').style.display='block'; $('#avatar-placeholder').style.display='none'; $('#sidebar-avatar').src = profile.avatar; $('#sidebar-avatar').style.display = 'block'; $('#top-avatar').src = profile.avatar; $('#top-avatar').style.display='block'; }
-        else { $('#avatar-preview').style.display='none'; $('#avatar-placeholder').style.display='block'; $('#sidebar-avatar').style.display='none'; $('#top-avatar').style.display='none'; }
+        if(profile.avatar){ 
+          $('#avatar-preview').src = profile.avatar; 
+          $('#avatar-preview').style.display='block'; 
+          $('#avatar-placeholder').style.display='none'; 
+          $('#sidebar-avatar').src = profile.avatar; 
+          $('#sidebar-avatar').style.display = 'block'; 
+          $('#top-avatar').src = profile.avatar; 
+          $('#top-avatar').style.display='block'; 
+        } else { 
+          $('#avatar-preview').style.display='none'; 
+          $('#avatar-placeholder').style.display='flex'; 
+          $('#sidebar-avatar').style.display='none'; 
+          $('#top-avatar').style.display='none'; 
+        }
       }
 
       $('#save-profile').addEventListener('click', saveProfileFromForm);
@@ -2146,7 +2285,15 @@
         $('#sidebar-name').textContent = profile.username || 'Shop Owner';
         $('#sidebar-shop').textContent = profile.shopname || 'ShopEase';
         $('#top-username').textContent = profile.username || 'Welcome';
-        if(profile.avatar){ $('#top-avatar').src = profile.avatar; $('#top-avatar').style.display='block'; $('#sidebar-avatar').src = profile.avatar; $('#sidebar-avatar').style.display='block'; } else { $('#top-avatar').style.display='none'; $('#sidebar-avatar').style.display='none'; }
+        if(profile.avatar){ 
+          $('#top-avatar').src = profile.avatar; 
+          $('#top-avatar').style.display='block'; 
+          $('#sidebar-avatar').src = profile.avatar; 
+          $('#sidebar-avatar').style.display='block'; 
+        } else { 
+          $('#top-avatar').style.display='none'; 
+          $('#sidebar-avatar').style.display='none'; 
+        }
       }
       applyProfileToUI();
       loadProfileToForm();
