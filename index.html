@@ -159,7 +159,7 @@
     .qty-btn{width:40px;height:40px;border-radius:10px;border:none;cursor:pointer;font-weight:700;background:var(--glass);color:var(--text);font-size:16px;}
     .price{font-weight:800}
 
-    /* Table styles with improved mobile handling */
+    /* Table styles with improved mobile handling - DESKTOP ONLY */
     table.products-table{width:100%;border-collapse:collapse;font-size:14px}
     table.products-table th,table.products-table td{padding:12px 8px;text-align:left;border-bottom:1px solid rgba(0,0,0,0.06);min-height:44px;}
     .action-btn{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;margin:0 4px;min-height:44px;min-width:44px;background:transparent;color:var(--text);font-size:14px;}
@@ -233,7 +233,7 @@
     
     .file-preview{width:80px;height:80px;border-radius:12px;object-fit:cover;border:1px dashed rgba(0,0,0,0.08);}
     
-    /* Table scroll container */
+    /* Table scroll container - DESKTOP ONLY */
     .table-scroll {
       width: 100%;
       overflow-x: auto;
@@ -242,6 +242,199 @@
       margin-bottom: 8px;
     }
 
+    /* ===== MOBILE PRODUCT CARDS STYLES (hidden on desktop) ===== */
+    .mobile-products-list {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .swipeable-card-container {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 12px;
+      background: transparent;
+      touch-action: pan-y pinch-zoom;
+    }
+    
+    .swipeable-card {
+      display: flex;
+      width: 100%;
+      transition: transform 0.3s ease;
+      transform: translateX(0);
+      cursor: grab;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    
+    .swipeable-card:active {
+      cursor: grabbing;
+    }
+    
+    .swipeable-card.swiped-left {
+      transform: translateX(-120px);
+    }
+    
+    .product-main-content {
+      flex: 1;
+      padding: 16px;
+      background: var(--card);
+      border-radius: 12px;
+      position: relative;
+      z-index: 2;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    /* Swipe handle indicator */
+    .swipe-handle {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 40px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 4px;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    .swipe-handle::after {
+      content: '‹‹';
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: -2px;
+    }
+    
+    .action-buttons-reveal {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 2px;
+      padding: 0 4px;
+      background: transparent;
+      z-index: 1;
+      border-radius: 0 12px 12px 0;
+      pointer-events: none;
+    }
+    
+    .swipeable-card.swiped-left .action-buttons-reveal {
+      pointer-events: auto;
+    }
+    
+    .swipe-action-btn {
+      flex: 1;
+      height: 80%;
+      min-width: 50px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: white;
+      min-height: 52px;
+    }
+    
+    .swipe-action-btn.edit-btn {
+      background: var(--primary);
+    }
+    
+    .swipe-action-btn.delete-btn {
+      background: var(--danger);
+    }
+    
+    .swipe-action-btn i {
+      font-size: 18px;
+    }
+    
+    .product-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .product-info-row .name {
+      font-weight: 700;
+      font-size: 16px;
+    }
+    
+    .product-info-row .category {
+      font-size: 13px;
+      color: var(--muted);
+      background: rgba(0,0,0,0.03);
+      padding: 4px 8px;
+      border-radius: 20px;
+    }
+    
+    .product-details-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .detail-label {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    
+    .detail-value {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    
+    .detail-value.price {
+      color: var(--primary);
+    }
+    
+    .detail-value.cost {
+      color: var(--muted);
+    }
+    
+    .detail-value.stock {
+      color: var(--success);
+    }
+    
+    .detail-value.stock.low {
+      color: var(--danger);
+    }
+    
+    .barcode-badge {
+      font-size: 11px;
+      background: rgba(0,0,0,0.03);
+      padding: 4px 8px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 8px;
+      font-family: monospace;
+    }
+    
     /* ===== MOBILE-FIRST MEDIA QUERIES ===== */
     
     /* Mobile styles (under 768px) */
@@ -385,14 +578,14 @@
         gap: 8px;
       }
       
-      /* Table horizontal scroll on mobile */
+      /* Hide table on mobile */
       .table-scroll {
-        margin: 0 -4px;
-        padding: 0 4px;
+        display: none;
       }
       
-      table.products-table {
-        min-width: 650px;
+      /* Show mobile products list */
+      .mobile-products-list {
+        display: flex;
       }
       
       /* Charts stack nicely */
@@ -566,6 +759,14 @@
       .modal-card [style*="grid-template-columns: 1fr 1fr"] {
         display: grid;
       }
+      
+      .mobile-products-list {
+        display: none !important;
+      }
+      
+      .table-scroll {
+        display: block;
+      }
     }
     
     /* Ensure all clickable elements meet minimum touch target size */
@@ -579,7 +780,8 @@
     .btn,
     select,
     input[type="checkbox"],
-    input[type="radio"] {
+    input[type="radio"],
+    .swipe-action-btn {
       min-height: 44px;
       min-width: 44px;
     }
@@ -836,6 +1038,7 @@
             </div>
           </div>
 
+          <!-- Desktop Table (hidden on mobile) -->
           <div class="table-scroll">
             <table class="products-table">
               <thead>
@@ -844,6 +1047,9 @@
               <tbody id="products-table-body"></tbody>
             </table>
           </div>
+
+          <!-- Mobile Swipeable Cards (visible only on mobile) -->
+          <div class="mobile-products-list" id="mobile-products-list"></div>
         </section>
 
         <!-- Customers -->
@@ -1108,7 +1314,10 @@
         // update stats when showing dashboard/inventory/products
         if(pageId === 'dashboard') renderStats();
         if(pageId === 'inventory') renderLowStock();
-        if(pageId === 'products') renderProductsTable();
+        if(pageId === 'products') {
+          renderProductsTable();
+          renderMobileProductsList(); // Render mobile cards when products page is shown
+        }
         if(pageId === 'profile') loadProfileToForm();
         if(pageId === 'customers') renderCustomers();
         if(pageId === 'reports') renderReports(); // charts
@@ -1164,7 +1373,7 @@
       $('#search-products').addEventListener('input', ()=> renderProductsGrid($('#search-products').value));
       $('#filter-cat').addEventListener('change', ()=> renderProductsGrid($('#search-products').value));
 
-      // ---------- Products table ----------
+      // ---------- Products table (DESKTOP) ----------
       function renderProductsTable(){
         const tbody = $('#products-table-body'); tbody.innerHTML = '';
         products.forEach(p=>{
@@ -1189,9 +1398,157 @@
             const action = bt.dataset.action;
             if(action === 'edit') openEditProduct(id);
             if(action === 'del') {
-              if(confirm('Delete product?')) { products = products.filter(p=>p.id!==id); save(KEY_PRODUCTS, products); renderProductsTable(); renderProductsGrid($('#search-products').value); toast('Deleted'); }
+              if(confirm('Delete product?')) { products = products.filter(p=>p.id!==id); save(KEY_PRODUCTS, products); renderProductsTable(); renderProductsGrid($('#search-products').value); renderMobileProductsList(); toast('Deleted'); }
             }
           });
+        });
+      }
+
+      // ---------- Mobile Products List (SWIPEABLE CARDS) ----------
+      function renderMobileProductsList() {
+        const container = $('#mobile-products-list');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (products.length === 0) {
+          container.innerHTML = '<div class="small-muted center" style="padding: 40px 0;">No products found</div>';
+          return;
+        }
+        
+        products.forEach(p => {
+          const cardContainer = document.createElement('div');
+          cardContainer.className = 'swipeable-card-container';
+          cardContainer.dataset.id = p.id;
+          
+          // Track touch events for swipe
+          let touchStartX = 0;
+          let touchEndX = 0;
+          let isSwiped = false;
+          
+          const card = document.createElement('div');
+          card.className = 'swipeable-card';
+          
+          // Determine stock status class
+          const stockClass = p.stock <= 5 ? 'low' : '';
+          
+          card.innerHTML = `
+            <div class="product-main-content">
+              <div class="swipe-handle"></div>
+              <div class="product-info-row">
+                <span class="name">${escapeHtml(p.name)}</span>
+                <span class="category">${escapeHtml(p.category)}</span>
+              </div>
+              <div class="product-details-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Price</span>
+                  <span class="detail-value price">₹${num(p.price)}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Cost</span>
+                  <span class="detail-value cost">₹${num(p.cost)}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Stock</span>
+                  <span class="detail-value stock ${stockClass}">${p.stock}</span>
+                </div>
+              </div>
+              ${p.barcode ? `<div class="barcode-badge"><i class="fas fa-barcode"></i> ${p.barcode}</div>` : ''}
+            </div>
+            <div class="action-buttons-reveal">
+              <button class="swipe-action-btn edit-btn" data-id="${p.id}" data-action="edit"><i class="fas fa-edit"></i></button>
+              <button class="swipe-action-btn delete-btn" data-id="${p.id}" data-action="del"><i class="fas fa-trash"></i></button>
+            </div>
+          `;
+          
+          cardContainer.appendChild(card);
+          
+          // Touch event handlers for swipe
+          card.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            // Remove swiped class if starting a new touch
+            if (card.classList.contains('swiped-left')) {
+              card.classList.remove('swiped-left');
+            }
+          }, { passive: true });
+          
+          card.addEventListener('touchmove', (e) => {
+            if (!touchStartX) return;
+            touchEndX = e.touches[0].clientX;
+            const diffX = touchStartX - touchEndX;
+            
+            // If swiped left more than 30px, show visual feedback
+            if (diffX > 30 && diffX < 120) {
+              card.style.transform = `translateX(-${Math.min(diffX, 120)}px)`;
+            } else if (diffX <= 30 && diffX > -30) {
+              card.style.transform = `translateX(0)`;
+            }
+          }, { passive: true });
+          
+          card.addEventListener('touchend', (e) => {
+            if (!touchStartX || !touchEndX) {
+              card.style.transform = '';
+              return;
+            }
+            
+            const diffX = touchStartX - touchEndX;
+            
+            // If swiped left more than 50px, reveal actions
+            if (diffX > 50) {
+              card.classList.add('swiped-left');
+              card.style.transform = '';
+            } else {
+              card.classList.remove('swiped-left');
+              card.style.transform = '';
+            }
+            
+            // Reset tracking
+            touchStartX = 0;
+            touchEndX = 0;
+          }, { passive: true });
+          
+          // Click on card (not swipe) - optional: could open edit or view details
+          card.addEventListener('click', (e) => {
+            // Don't trigger if clicking on action buttons
+            if (e.target.closest('.swipe-action-btn')) return;
+            
+            // If card is swiped, don't trigger click
+            if (card.classList.contains('swiped-left')) {
+              card.classList.remove('swiped-left');
+              return;
+            }
+            
+            // Optional: you could open edit modal or show details
+            // For now, we'll do nothing or could open edit
+            // openEditProduct(p.id);
+          });
+          
+          // Action button handlers
+          const editBtn = card.querySelector('.edit-btn');
+          const deleteBtn = card.querySelector('.delete-btn');
+          
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditProduct(p.id);
+            // Reset swipe state after action
+            card.classList.remove('swiped-left');
+          });
+          
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (confirm('Delete product?')) {
+              products = products.filter(prod => prod.id !== p.id);
+              save(KEY_PRODUCTS, products);
+              renderProductsTable();
+              renderProductsGrid($('#search-products').value);
+              renderMobileProductsList();
+              toast('Deleted');
+            }
+            // Reset swipe state
+            card.classList.remove('swiped-left');
+          });
+          
+          container.appendChild(cardContainer);
         });
       }
 
@@ -1222,7 +1579,9 @@
         }
         save(KEY_PRODUCTS, products);
         $('#product-modal').classList.remove('show');
-        renderProductsTable(); renderProductsGrid($('#search-products').value);
+        renderProductsTable(); 
+        renderProductsGrid($('#search-products').value);
+        renderMobileProductsList();
       });
 
       function openEditProduct(id){
@@ -1458,7 +1817,7 @@
         // clear cart input fields but keep invoice id preview
         cart = [];
         save(KEY_CART, cart);
-        renderCart(); renderProductsGrid($('#search-products').value); renderProductsTable();
+        renderCart(); renderProductsGrid($('#search-products').value); renderProductsTable(); renderMobileProductsList();
         renderCustomers();
         renderStats();
         renderReports(); // update charts
@@ -1690,7 +2049,7 @@
           bt.addEventListener('click', ()=> {
             const id = Number(bt.dataset.id);
             const qty = Number(prompt('Add qty', '10')) || 0;
-            const p = products.find(x=>x.id===id); if(p){ p.stock += qty; save(KEY_PRODUCTS, products); renderLowStock(); renderProductsGrid(); renderProductsTable(); toast('Restocked'); renderReports(); }
+            const p = products.find(x=>x.id===id); if(p){ p.stock += qty; save(KEY_PRODUCTS, products); renderLowStock(); renderProductsGrid(); renderProductsTable(); renderMobileProductsList(); toast('Restocked'); renderReports(); }
           });
         });
       }
@@ -1850,6 +2209,7 @@
       renderLowStock();
       renderCart();
       renderCustomers();
+      renderMobileProductsList(); // Initialize mobile cards
 
       // ---------- Utility: open edit if double-click product -->
       productsGrid.addEventListener('dblclick', (e)=>{
